@@ -1,0 +1,13 @@
+spring:
+    application:
+        name: seckill
+    profiles:
+        active: 246
+        # include: common
+
+server:
+    port: 8081
+
+logging:
+    level:
+        root: info

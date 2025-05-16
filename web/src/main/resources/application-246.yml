@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    username: root
+    password: lzh420821
+    url: jdbc:mysql://localhost:3306/seckill?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: localhost
+      password: 123456
+      port: 6379
+      lettuce:
+        pool:
+          max-active: 50 #连接池最大连接数（使用负值表示没有限制）
+          max-wait: 3000 #连接池最大阻塞等待时间（使用负值表示没有限制）
+          max-idle: 20   #连接池中的最大空闲连接
+          min-idle: 10    #连接池中的最小空闲连接
+        shutdown-timeout: 1s  # 关闭客户端连接之前等待任务处理完成的最长时间
+      timeout: 5000   #redis连接超时时间（毫秒）
+  rabbitmq:
+    virtual-host: /
+    username: admin
+    password: admin
+    addresses: 127.0.0.1:5672
+    listener:
+      simple:
+        concurrency: 4 # 4个消费者对应4个线程
+        max-concurrency: 8
+        prefetch: 10 # 每个消费者每次监听时可拉取处理的消息数量（一次处理消费数）
+        acknowledge-mode: auto
+        default-requeue-rejected: true # 消息处理失败重新入队
+        retry:
+          enabled: true # 开启消费者失败重试
+          initial-interval: 1000ms # 初始的失败等待时长为1秒
+          multiplier: 1 # 失败的等待时长倍数，下次等待时长 = multiplier * last-interval（类似csma-cd）
+          max-attempts: 3 # 最大重试次数
+          stateless: false # true无状态；false有状态。如果业务中包含事务，这里改为false
+    publisher-confirm-type: correlated # 保证消息到交换机
+    publisher-returns: true # 不可路由到队列的消息，回退
+
+
+mybatis:
+  type-aliases-package: com.lzh.entity
+  mapper-locations: classpath:mapper/*.xml
+#   config-location: classpath:mybatis-config.xml
