@@ -6,6 +6,10 @@ import com.lzh.response.Result;
 import com.lzh.service.ISeckillService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -35,7 +39,13 @@ public class SeckillController {
      * @return
      * //TODO: 不通过HttpServletRequest获取用户id
      */
-    @Operation(summary = "kill goods")
+    @Operation(
+        summary = "kill goods"
+    )
+    @Parameters({
+        // 添加请求头
+        @Parameter(in = ParameterIn.HEADER, name = "userId", schema = @Schema(type = "Integer"))
+    })
     @PostMapping("/{id}")
     public Result kill(@PathVariable("id") Integer killId, HttpServletRequest request) {
         Integer userId = Integer.parseInt(request.getHeader("userId"));

@@ -1,4 +1,7 @@
 package com.lzh;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,5 +25,10 @@ public class MyTest {
     @Test
     public void test_Chinese() {
         log.info("中文");
+    }
+
+    @Test
+    public void test_LocaDateTime() {
+        log.info("{}", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 }

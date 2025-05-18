@@ -1,18 +1,25 @@
 package com.lzh.service.impl;
 
+import java.util.Objects;
+
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.lzh.entity.GoodsKillOrder;
+import com.lzh.mapper.GoodsKillMapper;
+import com.lzh.mapper.GoodsKillOrderMapper;
+import com.lzh.mapper.GoodsMapper;
 import com.lzh.response.Result;
 import com.lzh.service.ISeckillService;
 import com.lzh.utils.Constants;
 import com.lzh.utils.RedisUtil;
 
 import cn.hutool.core.lang.Snowflake;
+import cn.hutool.json.JSONUtil;
 
 @Service
 public class SeckillServiceImpl implements ISeckillService {
@@ -22,6 +29,12 @@ public class SeckillServiceImpl implements ISeckillService {
     private RedisUtil redisUtil;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private GoodsKillOrderMapper goodsKillOrderMapper;
+    @Autowired
+    private GoodsMapper goodsMapper;
+    @Autowired
+    private GoodsKillMapper goodsKillMapper;
 
     private static DefaultRedisScript <Long> SECK_SCRIPT = new DefaultRedisScript<>();
     static {
@@ -51,6 +64,7 @@ public class SeckillServiceImpl implements ISeckillService {
                 orderId = snowflake.nextId();
             } catch (IllegalStateException ise) {
                 //出现时钟回拨报错，那就重新生成一个id
+                orderId = 0L;
             }
         }
         // 创建订单对象
@@ -65,8 +79,38 @@ public class SeckillServiceImpl implements ISeckillService {
             , Constants.MQ_KILL_GOOD_ROUTE
             , goodsKillOrder
         );
+        //TODO: 订单超时处理？
     
         return Result.success(orderId);
     }
 
+    @Transactional
+    @Override
+    public void saveOrder(GoodsKillOrder order) {
+        try {
+            String orderId = String.valueOf(order.getOrderId());
+            if (redisUtil.sismember(Constants.SECKILL_ORDER_KILLED + order.getGoodsKillId(), orderId)) {
+                // 消息幂等
+                return;
+            }
+            redisUtil.sadd(Constants.SECKILL_ORDER_KILLED + order.getGoodsKillId(), orderId);
+            // 查询商品id
+            String goodsId = redisUtil.get(Constants.CACHE_GOODSID_KILLID + order.getGoodsKillId());
+            if (Objects.isNull(goodsId)) {
+                redisUtil.set(
+                    Constants.CACHE_GOODSID_KILLID + order.getGoodsKillId()
+                    , String.valueOf(goodsKillMapper.findgoodsId(order.getGoodsKillId()))
+                    , 10);
+            }
+            // 扣减库存
+            // goodsMapper.cutStock(goodsId, 1); // 商品总库存待支付后再扣减
+            goodsKillMapper.cutStock(order.getGoodsKillId());
+            // 保存订单
+            goodsKillOrderMapper.insert(order);
+        } catch (Exception ex) {
+            // redis回滚
+            redisUtil.spop(Constants.SECKILL_ORDER_KILLED + order.getGoodsKillId(), order.getOrderId());
+            throw new RuntimeException("下单失败!\t" + ex.getMessage());
+        }
+    }
 }

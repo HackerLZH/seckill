@@ -2,7 +2,7 @@ spring:
     application:
         name: seckill
     profiles:
-        active: 246
+        active: wuji14+
         # include: common
 
 server:

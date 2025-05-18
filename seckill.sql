@@ -47,7 +47,7 @@ drop table if exists `goods_kill_order`;
 create table `goods_kill_order` (
     `order_id` varchar(100) primary key comment '订单编号',
     `user_id` int not null comment '用户id',
-    -- `goods_id` int not null comment '商品id',
     `kill_id` int not null comment '商品秒杀id',
-    `status` tinyint(1) DEFAULT 0 COMMENT '秒杀结果: 0待付款 1已付款 2已取消'
+    `status` tinyint(1) not null DEFAULT 0 COMMENT '秒杀结果: 0待付款 1已付款 2已取消',
+    `create_time` datetime not null comment '创建时间'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='秒杀订单表';
