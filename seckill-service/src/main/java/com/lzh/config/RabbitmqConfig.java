@@ -67,72 +67,69 @@ public class RabbitmqConfig {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMandatory(true); // 消费者在消息没有被路由到合适队列情况下会被return监听，而不会自动删除
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
-        rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
-            log.info("消息发送成功:correlationData({}),ack({}),cause({})",correlationData,ack,cause);
-        });
-        rabbitTemplate.setReturnsCallback(returnedMessage -> {
-            log.warn("消息丢失:exchange({}),route({}),replyCode({}),replyText({}),message:{}",returnedMessage.getExchange(),returnedMessage.getRoutingKey(),returnedMessage.getReplyCode(),returnedMessage.getReplyText(),returnedMessage.getMessage());
-        });
+        // rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
+        //     log.info("消息发送成功:correlationData({}),ack({}),cause({})",correlationData,ack,cause);
+        // });
+        // rabbitTemplate.setReturnsCallback(returnedMessage -> {
+        //     log.warn("消息丢失:exchange({}),route({}),replyCode({}),replyText({}),message:{}",returnedMessage.getExchange(),returnedMessage.getRoutingKey(),returnedMessage.getReplyCode(),returnedMessage.getReplyText(),returnedMessage.getMessage());
+        // });
         return rabbitTemplate;
     }
 
 
-    //秒杀下单通知的消息模型
+    // 用于异步秒杀下单的消息队列
     @Bean
-    public Queue seckillOrderQueue(){
+    Queue seckillGoodQueue(){
         return new Queue(Constants.MQ_KILL_GOOD_QUEUE,true);
     }
 
     @Bean
-    public TopicExchange seckillOrderExchange(){
+    TopicExchange seckillGoodExchange(){
         return new TopicExchange(Constants.MQ_KILL_GOOD_EXCHANGE,true,false);
     }
 
     @Bean
-    public Binding seckillOrderBinding(){
-        return BindingBuilder.bind(seckillOrderQueue()).to(seckillOrderExchange()).with(Constants.MQ_KILL_GOOD_ROUTE);
+    Binding seckillGoodBinding(){
+        return BindingBuilder.bind(seckillGoodQueue()).to(seckillGoodExchange()).with(Constants.MQ_KILL_GOOD_ROUTE);
     }
 
 
-    //TODO:构建秒杀成功之后-订单超时未支付的死信队列消息模型
+    // 下单成功后进入延迟队列
+    @Bean
+    Queue seckillGoodOrderQueue(){
+        // 关联死信队列
+        Map<String, Object> argsMap= new HashMap<>();
+        argsMap.put("x-message-ttl", 10000); // 假设订单存在10秒超时，则进入死信队列
+        argsMap.put("x-dead-letter-exchange", Constants.MQ_KILL_GOOD_DLX_EXCHANGE);
+        argsMap.put("x-dead-letter-routing-key", Constants.MQ_KILL_GOOD_DLX_ROUTE);
+        return new Queue(Constants.MQ_KILL_GOOD_ORDER_QUEUE, true, false, false, argsMap);
+    }
 
-    // @Bean
-    // public Queue successKillDeadQueue(){
-    //     Map<String, Object> argsMap= new HashMap<>();
-    //     argsMap.put("x-dead-letter-exchange",env.getProperty("mq.kill.good.success.dead.exchange"));
-    //     argsMap.put("x-dead-letter-routing-key",env.getProperty("mq.kill.good.success.dead.routing.key"));
-    //     return new Queue(env.getProperty("mq.kill.good.success.dead.queue"),true,false,false,argsMap);
-    // }
+    @Bean
+    TopicExchange seckillGoodOrderExchange(){
+        return new TopicExchange(Constants.MQ_KILL_GOOD_ORDER_EXCHANGE,true,false);
+    }
 
-    // //基本交换机
-    // @Bean
-    // public TopicExchange successKillDeadProdExchange(){
-    //     return new TopicExchange(env.getProperty("mq.kill.item.success.kill.dead.prod.exchange"),true,false);
-    // }
+    @Bean
+    Binding seckillGoodOrderBinding(){
+        return BindingBuilder.bind(seckillGoodOrderQueue()).to(seckillGoodOrderExchange()).with(Constants.MQ_KILL_GOOD_ORDER_ROUTE);
+    }
 
-    // //创建基本交换机+基本路由 -> 死信队列 的绑定
-    // @Bean
-    // public Binding successKillDeadProdBinding(){
-    //     return BindingBuilder.bind(successKillDeadQueue()).to(successKillDeadProdExchange()).with(env.getProperty("mq.kill.item.success.kill.dead.prod.routing.key"));
-    // }
+    // 死信队列，交换机，路由
+    @Bean
+    Queue seckillGoodDlxQueue(){
+        return new Queue(Constants.MQ_KILL_GOOD_DLX_QUEUE,true);
+    }
 
-    // //真正的队列
-    // @Bean
-    // public Queue successKillRealQueue(){
-    //     return new Queue(env.getProperty("mq.kill.item.success.kill.dead.real.queue"),true);
-    // }
+    @Bean
+    TopicExchange seckillGoodDlxExchange(){
+        return new TopicExchange(Constants.MQ_KILL_GOOD_DLX_EXCHANGE,true,false);
+    }
 
-    // //死信交换机
-    // @Bean
-    // public TopicExchange successKillDeadExchange(){
-    //     return new TopicExchange(env.getProperty("mq.kill.item.success.kill.dead.exchange"),true,false);
-    // }
-
-    // //死信交换机+死信路由->真正队列 的绑定
-    // @Bean
-    // public Binding successKillDeadBinding(){
-    //     return BindingBuilder.bind(successKillRealQueue()).to(successKillDeadExchange()).with(env.getProperty("mq.kill.item.success.kill.dead.routing.key"));
-    // }
+    @Bean
+    Binding seckillGoodDlxBinding(){
+        return BindingBuilder.bind(seckillGoodDlxQueue()).to(seckillGoodDlxExchange()).with(Constants.MQ_KILL_GOOD_DLX_ROUTE);
+    }
 
 
     //TODO:RabbitMQ限流

@@ -1,10 +1,9 @@
 package com.lzh.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
-
-import io.lettuce.core.dynamic.annotation.Param;
 
 @Mapper
 public interface GoodsKillMapper {
@@ -14,7 +13,7 @@ public interface GoodsKillMapper {
      * @return
      */
     @Select("select goods_id from goods_kill where id = #{killId}")
-    int findgoodsId(int killId);
+    Integer findgoodsId(int killId);
 
     /**
      * 库存扣减
@@ -23,5 +22,7 @@ public interface GoodsKillMapper {
      */
     @Update("update goods_kill set stock = stock - 1 " 
             + "where id = #{id} and stock > 0")
-    int cutStock(@Param("id") int id);
+    void cutStock(@Param("id") int id);
+    @Update("update goods_kill set stock = stock + #{num} where id = #{id}")
+    void addStock(@Param("id") int id, @Param("num") int num);
 }

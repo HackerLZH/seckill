@@ -1,6 +1,7 @@
 package com.lzh.utils;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,14 @@ public class RedisUtil {
         return stringRedisTemplate.opsForValue().get(key);
     }
 
+    public Boolean exists(String key) {
+        return stringRedisTemplate.hasKey(key);
+    }
+
+    public Boolean expire(String key, long timeout) {
+        return stringRedisTemplate.expire(key, timeout, TimeUnit.MINUTES);
+    }
+
     /**
      * 执行Lua脚本
      * @param script
@@ -54,6 +63,25 @@ public class RedisUtil {
         } else {
             stringRedisTemplate.opsForSet().add(key, JSONUtil.toJsonStr(value));
         }
+    }
+
+    /**
+     * 集合中添加元素
+     * @param timeout 超时（分钟）
+     * @param key
+     * @param values
+     * @return
+     */
+    public void sadd(String key, Object value, Long timeout) {
+        Boolean exists = exists(key);
+        if (value instanceof String) {
+            stringRedisTemplate.opsForSet().add(key, (String)value);   
+        } else {
+            stringRedisTemplate.opsForSet().add(key, JSONUtil.toJsonStr(value));
+        }
+        Optional.ofNullable(exists).filter(b -> !b).ifPresent(b -> {
+            expire(key, timeout);
+        });
     }
 
     /**

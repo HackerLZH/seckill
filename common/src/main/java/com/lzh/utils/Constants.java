@@ -11,8 +11,14 @@ public class Constants {
 
     public static final String CACHE_GOODSID_KILLID = "cache:goodsId:killId:";
 
-    // YML Key
+    // Rabbitmq key
     public static final String MQ_KILL_GOOD_QUEUE = "kill.good";
     public static final String MQ_KILL_GOOD_EXCHANGE = "kill.good";
     public static final String MQ_KILL_GOOD_ROUTE = "kill.good";
+    public static final String MQ_KILL_GOOD_ORDER_QUEUE = "kill.good.order";
+    public static final String MQ_KILL_GOOD_ORDER_EXCHANGE = "kill.good.order";
+    public static final String MQ_KILL_GOOD_ORDER_ROUTE = "kill.good.order";    
+    public static final String MQ_KILL_GOOD_DLX_QUEUE = "kill.good.dlx";
+    public static final String MQ_KILL_GOOD_DLX_EXCHANGE = "kill.good.dlx";
+    public static final String MQ_KILL_GOOD_DLX_ROUTE = "kill.good.dlx"; 
 }
