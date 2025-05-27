@@ -1,0 +1,76 @@
+version: "3"
+
+services:
+  seckill:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lzh/seckill:latest
+    container_name: seckill
+    # restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "8081:8081"
+    networks:
+      - seckill
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+  redis:
+    image: redis
+    container_name: redis
+    # restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "6379:6379"
+    volumes:
+      - /d/docker/redis/conf/redis.conf:/etc/redis/redis.conf
+      - /d/docker/redis/data:/data
+      - /d/docker/redis/log:/var/log/redis
+    networks:
+      - seckill
+    command: redis-server /etc/redis/redis.conf
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    # restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=seckill
+    ports:
+      - "3306:3306"
+    volumes:
+      - /d/docker/mysql/data:/var/lib/mysql
+      - /d/docker/mysql/log:/var/log/mysql
+      - /d/docker/mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - seckill
+    command: [
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci'
+    ]
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    hostname: rabbitserver
+    # restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - /d/docker/rabbitmq/log:/var/log/rabbitmq
+      - /d/docker/rabbitmq/data:/var/lib/rabbitmq
+    networks:
+      - seckill
+
+networks:
+  seckill:
+    driver: bridge
