@@ -1,53 +1,147 @@
-drop table if exists `user`;
-create table `user` (
-    `id` int primary key auto_increment comment '用户id',
-    `name` varchar(100) not null comment '用户名',
-    `password` varchar(100) not null comment '用户密码',
-    `age` int not null default 0 comment '用户年龄',
-    `sex` enum('男', '女') default null comment '用户性别',
-    `email` varchar(100) default null comment '用户邮箱',
-    `phone` varchar(100) default null comment '用户手机号',
-    `address` varchar(100) default null comment '用户地址',
-    `create_time` datetime not null comment '用户创建时间',
-    `is_active` tinyint(1) DEFAULT 1 COMMENT '是否有效(1=是；0=否)',
-    unique key `idx_name` (`name`),
-    unique key `idx_email` (`email`),
-    unique key `idx_phone` (`phone`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户表';
+-- MySQL dump 10.13  Distrib 8.0.37, for Linux (x86_64)
+--
+-- Host: localhost    Database: seckill
+-- ------------------------------------------------------
+-- Server version	8.0.37
 
-insert into `user`(`id`, `name`, `password`, `create_time`) values(1, 'admin', 'admin', now());
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-drop table if exists `goods`;
-create table `goods` (
-    `id` int primary key auto_increment comment '商品id',
-    `name` varchar(100) not null comment '商品名称',
-    `price` decimal(10, 2) not null comment '商品价格',
-    `stock` int not null comment '商品库存',
-    `create_time` datetime not null comment '商品创建时间',
-    `is_active` tinyint(1) DEFAULT 1 COMMENT '是否有效(1=是；0=否)',
-    unique key `idx_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='商品表';
+--
+-- Table structure for table `goods`
+--
 
-insert into `goods`(`id`, `name`, `price`, `stock`, `create_time`) values(1, 'iphone16', 12999.00, 1000, now());
+DROP TABLE IF EXISTS `goods`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `goods` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'å•†å“id',
+  `name` varchar(100) NOT NULL COMMENT 'å•†å“åç§°',
+  `price` decimal(10,2) NOT NULL COMMENT 'å•†å“ä»·æ ¼',
+  `stock` int NOT NULL COMMENT 'å•†å“åº“å­˜',
+  `create_time` datetime NOT NULL COMMENT 'å•†å“åˆ›å»ºæ—¶é—´',
+  `is_active` tinyint(1) DEFAULT '1' COMMENT 'æ˜¯å¦æœ‰æ•ˆ(1=æ˜¯ï¼›0=å¦)',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COMMENT='å•†å“è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-drop table if exists `goods_kill`;
-create table `goods_kill` (
-    `id` int primary key auto_increment comment '商品秒杀id',
-    `goods_id` int not null comment '商品id',
-    `stock` int not null comment '秒杀库存',
-    `start_time` datetime not null comment '秒杀开始时间',
-    `end_time` datetime not null comment '秒杀结束时间',
-    `create_time` datetime not null comment '秒杀创建时间',
-    `is_active` tinyint(1) DEFAULT 1 COMMENT '是否有效(1=是；0=否)'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='商品秒杀表';
+--
+-- Dumping data for table `goods`
+--
 
-insert into `goods_kill`(`id`, `goods_id`, `stock`, `start_time`, `end_time`, `create_time`) values(1, 1, 100, '1970-01-01 00:00:00', '1970-01-01 00:00:10', now());
+LOCK TABLES `goods` WRITE;
+/*!40000 ALTER TABLE `goods` DISABLE KEYS */;
+INSERT INTO `goods` VALUES (1,'iphone16',12999.00,1000,'2025-05-14 14:01:54',1);
+/*!40000 ALTER TABLE `goods` ENABLE KEYS */;
+UNLOCK TABLES;
 
-drop table if exists `goods_kill_order`;
-create table `goods_kill_order` (
-    `order_id` varchar(100) primary key comment '订单编号',
-    `user_id` int not null comment '用户id',
-    `kill_id` int not null comment '商品秒杀id',
-    `status` tinyint(1) not null DEFAULT 0 COMMENT '秒杀结果: 0待付款 1已付款 2已取消',
-    `create_time` datetime not null comment '创建时间'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='秒杀订单表';
+--
+-- Table structure for table `goods_kill`
+--
+
+DROP TABLE IF EXISTS `goods_kill`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `goods_kill` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'å•†å“ç§’æ€id',
+  `goods_id` int NOT NULL COMMENT 'å•†å“id',
+  `stock` int NOT NULL COMMENT 'ç§’æ€åº“å­˜',
+  `start_time` datetime NOT NULL COMMENT 'ç§’æ€å¼€å§‹æ—¶é—´',
+  `end_time` datetime NOT NULL COMMENT 'ç§’æ€ç»“æŸæ—¶é—´',
+  `create_time` datetime NOT NULL COMMENT 'ç§’æ€åˆ›å»ºæ—¶é—´',
+  `is_active` tinyint(1) DEFAULT '1' COMMENT 'æ˜¯å¦æœ‰æ•ˆ(1=æ˜¯ï¼›0=å¦)',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COMMENT='å•†å“ç§’æ€è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `goods_kill`
+--
+
+LOCK TABLES `goods_kill` WRITE;
+/*!40000 ALTER TABLE `goods_kill` DISABLE KEYS */;
+INSERT INTO `goods_kill` VALUES (1,1,100,'1970-01-01 00:00:00','1970-01-01 00:00:10','2025-05-14 14:01:54',1);
+/*!40000 ALTER TABLE `goods_kill` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `goods_kill_order`
+--
+
+DROP TABLE IF EXISTS `goods_kill_order`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `goods_kill_order` (
+  `order_id` bigint NOT NULL,
+  `user_id` int NOT NULL COMMENT 'ç”¨æˆ·id',
+  `kill_id` int NOT NULL COMMENT 'å•†å“ç§’æ€id',
+  `status` tinyint(1) NOT NULL DEFAULT '0',
+  `create_time` datetime NOT NULL,
+  PRIMARY KEY (`order_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='ç§’æ€è®¢å•è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `goods_kill_order`
+--
+
+LOCK TABLES `goods_kill_order` WRITE;
+/*!40000 ALTER TABLE `goods_kill_order` DISABLE KEYS */;
+INSERT INTO `goods_kill_order` VALUES (1924806184485916672,135,1,2,'2025-05-20 12:35:31'),(1924806184485916673,152,1,2,'2025-05-20 12:35:31'),(1924806184485916674,8,1,2,'2025-05-20 12:35:31'),(1924806184485916675,142,1,2,'2025-05-20 12:35:31'),(1924806184485916676,91,1,2,'2025-05-20 12:35:31'),(1924806184485916677,24,1,2,'2025-05-20 12:35:31'),(1924806184485916678,126,1,2,'2025-05-20 12:35:31'),(1924806184485916679,101,1,2,'2025-05-20 12:35:31'),(1924806184485916680,158,1,2,'2025-05-20 12:35:31'),(1924806184485916681,116,1,2,'2025-05-20 12:35:31'),(1924806184485916682,60,1,2,'2025-05-20 12:35:31'),(1924806184485916683,64,1,2,'2025-05-20 12:35:31'),(1924806184485916684,184,1,2,'2025-05-20 12:35:31'),(1924806184485916685,159,1,2,'2025-05-20 12:35:31'),(1924806184485916686,37,1,2,'2025-05-20 12:35:31'),(1924806184485916687,181,1,2,'2025-05-20 12:35:31'),(1924806184485916688,130,1,2,'2025-05-20 12:35:31'),(1924806184485916689,67,1,2,'2025-05-20 12:35:31'),(1924806184485916690,132,1,2,'2025-05-20 12:35:31'),(1924806184485916691,96,1,2,'2025-05-20 12:35:31'),(1924806184485916692,161,1,2,'2025-05-20 12:35:31'),(1924806184485916693,197,1,2,'2025-05-20 12:35:31'),(1924806184485916694,47,1,2,'2025-05-20 12:35:31'),(1924806184485916695,31,1,2,'2025-05-20 12:35:31'),(1924806184485916696,75,1,2,'2025-05-20 12:35:31'),(1924806184485916697,114,1,2,'2025-05-20 12:35:31'),(1924806184485916698,189,1,2,'2025-05-20 12:35:31'),(1924806184485916699,122,1,2,'2025-05-20 12:35:31'),(1924806184485916700,103,1,2,'2025-05-20 12:35:31'),(1924806184485916701,144,1,2,'2025-05-20 12:35:31'),(1924806184485916702,98,1,2,'2025-05-20 12:35:31'),(1924806184485916703,202,1,2,'2025-05-20 12:35:31'),(1924806184485916704,81,1,2,'2025-05-20 12:35:31'),(1924806184485916705,61,1,2,'2025-05-20 12:35:31'),(1924806184485916706,42,1,2,'2025-05-20 12:35:31'),(1924806184485916707,168,1,2,'2025-05-20 12:35:31'),(1924806184485916708,77,1,2,'2025-05-20 12:35:31'),(1924806184485916709,15,1,2,'2025-05-20 12:35:31'),(1924806184485916710,137,1,2,'2025-05-20 12:35:31'),(1924806184485916711,3,1,2,'2025-05-20 12:35:31'),(1924806184485916712,198,1,2,'2025-05-20 12:35:31'),(1924806184485916713,129,1,2,'2025-05-20 12:35:31'),(1924806184485916714,72,1,2,'2025-05-20 12:35:31'),(1924806184485916715,186,1,2,'2025-05-20 12:35:31'),(1924806184485916716,73,1,2,'2025-05-20 12:35:31'),(1924806184485916717,39,1,2,'2025-05-20 12:35:31'),(1924806184485916718,50,1,2,'2025-05-20 12:35:31'),(1924806184485916719,23,1,2,'2025-05-20 12:35:31'),(1924806184485916720,30,1,2,'2025-05-20 12:35:31'),(1924806184485916721,108,1,2,'2025-05-20 12:35:31'),(1924806184485916722,169,1,2,'2025-05-20 12:35:31'),(1924806184485916723,173,1,2,'2025-05-20 12:35:31'),(1924806184485916724,14,1,2,'2025-05-20 12:35:31'),(1924806184485916725,41,1,2,'2025-05-20 12:35:31'),(1924806184485916726,112,1,2,'2025-05-20 12:35:31'),(1924806184485916727,166,1,2,'2025-05-20 12:35:31'),(1924806184485916728,80,1,2,'2025-05-20 12:35:31'),(1924806184494305280,54,1,2,'2025-05-20 12:35:31'),(1924806184494305281,21,1,2,'2025-05-20 12:35:31'),(1924806184494305282,124,1,2,'2025-05-20 12:35:31'),(1924806184494305283,33,1,2,'2025-05-20 12:35:31'),(1924806184494305284,149,1,2,'2025-05-20 12:35:31'),(1924806184494305285,68,1,2,'2025-05-20 12:35:31'),(1924806184494305286,136,1,2,'2025-05-20 12:35:31'),(1924806184494305287,109,1,2,'2025-05-20 12:35:31'),(1924806184494305288,5,1,2,'2025-05-20 12:35:31'),(1924806184494305289,165,1,2,'2025-05-20 12:35:31'),(1924806184494305290,19,1,2,'2025-05-20 12:35:31'),(1924806184494305291,163,1,2,'2025-05-20 12:35:31'),(1924806184494305292,53,1,2,'2025-05-20 12:35:31'),(1924806184494305293,139,1,2,'2025-05-20 12:35:31'),(1924806184494305294,200,1,2,'2025-05-20 12:35:31'),(1924806184494305295,160,1,2,'2025-05-20 12:35:31'),(1924806184494305296,92,1,2,'2025-05-20 12:35:31'),(1924806184494305297,78,1,2,'2025-05-20 12:35:31'),(1924806184494305298,17,1,2,'2025-05-20 12:35:31'),(1924806184494305299,106,1,2,'2025-05-20 12:35:31'),(1924806184494305300,153,1,2,'2025-05-20 12:35:31'),(1924806184494305301,194,1,2,'2025-05-20 12:35:31'),(1924806184494305302,147,1,2,'2025-05-20 12:35:31'),(1924806184494305303,196,1,2,'2025-05-20 12:35:31'),(1924806184494305304,162,1,2,'2025-05-20 12:35:31'),(1924806184494305305,87,1,2,'2025-05-20 12:35:31'),(1924806184494305306,44,1,2,'2025-05-20 12:35:31'),(1924806184494305307,25,1,2,'2025-05-20 12:35:31'),(1924806184494305308,100,1,2,'2025-05-20 12:35:31'),(1924806184494305309,207,1,2,'2025-05-20 12:35:31'),(1924806184494305310,155,1,2,'2025-05-20 12:35:31'),(1924806184494305311,131,1,2,'2025-05-20 12:35:31'),(1924806184494305312,119,1,2,'2025-05-20 12:35:31'),(1924806184494305313,110,1,2,'2025-05-20 12:35:31'),(1924806184494305314,52,1,2,'2025-05-20 12:35:31'),(1924806184494305315,82,1,2,'2025-05-20 12:35:31'),(1924806184494305316,113,1,2,'2025-05-20 12:35:31'),(1924806184494305317,76,1,2,'2025-05-20 12:35:31'),(1924806184494305318,154,1,2,'2025-05-20 12:35:31'),(1924806184498499584,182,1,2,'2025-05-20 12:35:31'),(1924806184498499585,133,1,2,'2025-05-20 12:35:31'),(1924806184498499586,141,1,2,'2025-05-20 12:35:31'),(1924806184498499587,199,1,2,'2025-05-20 12:35:31');
+/*!40000 ALTER TABLE `goods_kill_order` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user`
+--
+
+DROP TABLE IF EXISTS `user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT 'ç”¨æˆ·id',
+  `name` varchar(100) NOT NULL COMMENT 'ç”¨æˆ·å',
+  `password` varchar(100) NOT NULL COMMENT 'ç”¨æˆ·å¯†ç ',
+  `age` int NOT NULL DEFAULT '0' COMMENT 'ç”¨æˆ·å¹´é¾„',
+  `sex` enum('ç”·','å¥³') DEFAULT NULL COMMENT 'ç”¨æˆ·æ€§åˆ«',
+  `email` varchar(100) DEFAULT NULL COMMENT 'ç”¨æˆ·é‚®ç®±',
+  `phone` varchar(100) DEFAULT NULL COMMENT 'ç”¨æˆ·æ‰‹æœºå·',
+  `address` varchar(100) DEFAULT NULL COMMENT 'ç”¨æˆ·åœ°å€',
+  `create_time` datetime NOT NULL COMMENT 'ç”¨æˆ·åˆ›å»ºæ—¶é—´',
+  `is_active` tinyint(1) DEFAULT '1' COMMENT 'æ˜¯å¦æœ‰æ•ˆ(1=æ˜¯ï¼›0=å¦)',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_name` (`name`),
+  UNIQUE KEY `idx_email` (`email`),
+  UNIQUE KEY `idx_phone` (`phone`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COMMENT='ç”¨æˆ·è¡¨';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user`
+--
+
+LOCK TABLES `user` WRITE;
+/*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` VALUES (1,'admin','admin',0,NULL,NULL,NULL,NULL,'2025-05-14 14:01:54',1);
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-05-24  9:29:53

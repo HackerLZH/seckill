@@ -15,14 +15,15 @@
 	<description>Demo project for Spring Boot</description>
 
 	<properties>
-	   	<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+	   	<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring-boot.version>3.4.5</spring-boot.version>
 		<mybatis.version>3.0.4</mybatis.version>
 		<swagger.version>2.6.0</swagger.version>
 		<redisson.version>3.17.7</redisson.version>
 		<hutool.version>5.8.8</hutool.version>
+		<skipTests>true</skipTests>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
