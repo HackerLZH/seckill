@@ -70,6 +70,25 @@ services:
       - /d/docker/rabbitmq/data:/var/lib/rabbitmq
     networks:
       - seckill
+  nginx:
+    image: nginx:1.18.0
+    container_name: nginx
+    # restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - NGINX_PORT=80
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /d/docker/nginx/html:/usr/share/nginx/html
+      - /d/docker/nginx/log:/var/log/nginx
+      - /d/docker/nginx/conf.d:/etc/nginx/conf.d
+    privileged: true
+    networks:
+      - seckill
+    # depends_on:
+    #   - seckill
 
 networks:
   seckill:
