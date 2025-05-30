@@ -1,0 +1,6 @@
+docker:
+    service:
+        mysql: localhost
+        redis: localhost
+        rabbitmq: localhost
+        nacos: localhost

@@ -1,12 +1,25 @@
+server:
+  port: 8081
+  # forward-headers-strategy: framework
+
+logging:
+  level:
+    root: info
+
 spring:
+  application:
+      name: seckill-service
+  profiles:
+    include:
+    - common
   datasource:
     username: root
     password: 123456
-    url: jdbc:mysql://mysql:3306/seckill?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false
+    url: jdbc:mysql://${docker.service.mysql}:3306/seckill?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&allowPublicKeyRetrieval=true&useSSL=false
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
-      host: redis
+      host: ${docker.service.redis}
       password: 123456
       port: 6379
       lettuce:
@@ -21,7 +34,7 @@ spring:
     virtual-host: /
     username: admin
     password: admin
-    addresses: rabbitmq:5672
+    addresses: ${docker.service.rabbitmq}:5672
     listener:
       simple:
         concurrency: 4 # 4个消费者对应4个线程
@@ -37,6 +50,10 @@ spring:
           stateless: false # true无状态；false有状态。如果业务中包含事务，这里改为false
     publisher-confirm-type: correlated # 保证消息到交换机
     publisher-returns: true # 不可路由到队列的消息，回退
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${docker.service.nacos}:8848
 
 
 mybatis:

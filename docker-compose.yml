@@ -1,23 +1,23 @@
 version: "3"
 
 services:
-  seckill:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: lzh/seckill:latest
-    container_name: seckill
-    # restart: always
-    environment:
-      - TZ=Asia/Shanghai
-    ports:
-      - "8081:8081"
-    networks:
-      - seckill
-    depends_on:
-      - mysql
-      - redis
-      - rabbitmq
+  # seckill:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   image: lzh/seckill:latest
+  #   container_name: seckill
+  #   # restart: always
+  #   environment:
+  #     - TZ=Asia/Shanghai
+  #   ports:
+  #     - "8081:8081"
+  #   networks:
+  #     - seckill
+  #   depends_on:
+  #     - mysql
+  #     - redis
+  #     - rabbitmq
   redis:
     image: redis
     container_name: redis
@@ -40,7 +40,7 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - MYSQL_ROOT_PASSWORD=123456
-      - MYSQL_DATABASE=seckill
+      # - MYSQL_DATABASE=seckill
     ports:
       - "3306:3306"
     volumes:
@@ -87,8 +87,24 @@ services:
     privileged: true
     networks:
       - seckill
-    # depends_on:
-    #   - seckill
+  nacos:
+    image: nacos/nacos-server:v2.3.2
+    container_name: nacos
+    # restart: always
+    ports:
+      # web 界面访问端口
+      - 8848:8848
+      # 程序使用 grpc 连接的端口
+      - 9848:9848
+    environment:
+      - TZ=Asia/Shanghai
+      - MODE=standalone
+    volumes:
+      - /d/docker/nacos/conf/application.properties:/home/nacos/conf/application.properties
+      - /d/docker/nacos/logs:/home/nacos/logs
+      - /d/docker/nacos/data:/home/nacos/data
+    networks:
+      - seckill
 
 networks:
   seckill:

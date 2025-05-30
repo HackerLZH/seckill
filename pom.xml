@@ -7,9 +7,10 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<modules>
-		<module>web</module>
 		<module>common</module>
-		<module>seckill-service</module>
+		<module>seckill-service-8081</module>
+		<module>auth-service-8082</module>
+		<module>nacos-config-8847</module>
 	</modules>
 	<name>seckill</name>
 	<description>Demo project for Spring Boot</description>
@@ -18,7 +19,8 @@
 	   	<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring-boot.version>3.4.5</spring-boot.version>
+		<spring-boot.version>3.3.5</spring-boot.version>
+		<spring-cloud.version>2023.0.1.0</spring-cloud.version>
 		<mybatis.version>3.0.4</mybatis.version>
 		<swagger.version>2.6.0</swagger.version>
 		<redisson.version>3.17.7</redisson.version>
@@ -33,6 +35,13 @@
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.alibaba.cloud</groupId>
+				<artifactId>spring-cloud-alibaba-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.mybatis.spring.boot</groupId>

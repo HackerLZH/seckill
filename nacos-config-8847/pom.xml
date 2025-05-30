@@ -9,21 +9,18 @@
           <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>web</artifactId>
+    <artifactId>nacos-config-8847</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>com.lzh</groupId>
-            <artifactId>seckill-service</artifactId>
-            <version>${project.parent.version}</version>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>8.0.33</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
     </dependencies>
 
 	<build>
@@ -35,15 +32,12 @@
                 <executions>
                     <execution>
                         <goals>
-                            <!-- repackage 会替换 Maven 生成的原始 JAR 文件，
-                            使其变成可运行的 fat jar（包含所有依赖）,
-                            适合作为可部署的应用程序，不适合作为依赖包 -->
                             <goal>repackage</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <classifier>exec</classifier> <!-- 保留不含依赖的jar，作为依赖包 -->
+                    <classifier>exec</classifier>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
@@ -53,17 +47,6 @@
                 </configuration>
             </plugin>
 		</plugins>
-        <!-- <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <excludes>
-                    <exclude>**/*.properties</exclude>
-                    <exclude>**/*.xml</exclude>
-                    <exclude>**/*.yml</exclude>
-                </excludes>
-            </resource>
-        </resources> -->
-
 	</build>
 
 </project>
