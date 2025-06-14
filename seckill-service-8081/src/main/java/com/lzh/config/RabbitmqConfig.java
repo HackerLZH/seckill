@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.lzh.utils.Constants;
+import com.lzh.utils.SeckillConstants;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -80,17 +80,17 @@ public class RabbitmqConfig {
     // 用于异步秒杀下单的消息队列
     @Bean
     Queue seckillGoodQueue(){
-        return new Queue(Constants.MQ_KILL_GOOD_QUEUE,true);
+        return new Queue(SeckillConstants.MQ_KILL_GOOD_QUEUE,true);
     }
 
     @Bean
     TopicExchange seckillGoodExchange(){
-        return new TopicExchange(Constants.MQ_KILL_GOOD_EXCHANGE,true,false);
+        return new TopicExchange(SeckillConstants.MQ_KILL_GOOD_EXCHANGE,true,false);
     }
 
     @Bean
     Binding seckillGoodBinding(){
-        return BindingBuilder.bind(seckillGoodQueue()).to(seckillGoodExchange()).with(Constants.MQ_KILL_GOOD_ROUTE);
+        return BindingBuilder.bind(seckillGoodQueue()).to(seckillGoodExchange()).with(SeckillConstants.MQ_KILL_GOOD_ROUTE);
     }
 
 
@@ -100,35 +100,35 @@ public class RabbitmqConfig {
         // 关联死信队列
         Map<String, Object> argsMap= new HashMap<>();
         argsMap.put("x-message-ttl", 10000); // 假设订单存在10秒超时，则进入死信队列
-        argsMap.put("x-dead-letter-exchange", Constants.MQ_KILL_GOOD_DLX_EXCHANGE);
-        argsMap.put("x-dead-letter-routing-key", Constants.MQ_KILL_GOOD_DLX_ROUTE);
-        return new Queue(Constants.MQ_KILL_GOOD_ORDER_QUEUE, true, false, false, argsMap);
+        argsMap.put("x-dead-letter-exchange", SeckillConstants.MQ_KILL_GOOD_DLX_EXCHANGE);
+        argsMap.put("x-dead-letter-routing-key", SeckillConstants.MQ_KILL_GOOD_DLX_ROUTE);
+        return new Queue(SeckillConstants.MQ_KILL_GOOD_ORDER_QUEUE, true, false, false, argsMap);
     }
 
     @Bean
     TopicExchange seckillGoodOrderExchange(){
-        return new TopicExchange(Constants.MQ_KILL_GOOD_ORDER_EXCHANGE,true,false);
+        return new TopicExchange(SeckillConstants.MQ_KILL_GOOD_ORDER_EXCHANGE,true,false);
     }
 
     @Bean
     Binding seckillGoodOrderBinding(){
-        return BindingBuilder.bind(seckillGoodOrderQueue()).to(seckillGoodOrderExchange()).with(Constants.MQ_KILL_GOOD_ORDER_ROUTE);
+        return BindingBuilder.bind(seckillGoodOrderQueue()).to(seckillGoodOrderExchange()).with(SeckillConstants.MQ_KILL_GOOD_ORDER_ROUTE);
     }
 
     // 死信队列，交换机，路由
     @Bean
     Queue seckillGoodDlxQueue(){
-        return new Queue(Constants.MQ_KILL_GOOD_DLX_QUEUE,true);
+        return new Queue(SeckillConstants.MQ_KILL_GOOD_DLX_QUEUE,true);
     }
 
     @Bean
     TopicExchange seckillGoodDlxExchange(){
-        return new TopicExchange(Constants.MQ_KILL_GOOD_DLX_EXCHANGE,true,false);
+        return new TopicExchange(SeckillConstants.MQ_KILL_GOOD_DLX_EXCHANGE,true,false);
     }
 
     @Bean
     Binding seckillGoodDlxBinding(){
-        return BindingBuilder.bind(seckillGoodDlxQueue()).to(seckillGoodDlxExchange()).with(Constants.MQ_KILL_GOOD_DLX_ROUTE);
+        return BindingBuilder.bind(seckillGoodDlxQueue()).to(seckillGoodDlxExchange()).with(SeckillConstants.MQ_KILL_GOOD_DLX_ROUTE);
     }
 
 

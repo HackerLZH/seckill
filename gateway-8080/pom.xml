@@ -9,18 +9,39 @@
           <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>nacos-config-8847</artifactId>
+    <artifactId>gateway-8080</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
+        <dependency>
+            <groupId>com.lzh</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-gateway-spring-boot-starter</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+
+
     </dependencies>
 
 	<build>
@@ -28,16 +49,19 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.7.18</version>
+                <version>3.3.5</version>
                 <executions>
                     <execution>
                         <goals>
+                            <!-- repackage 会替换 Maven 生成的原始 JAR 文件，
+                            使其变成可运行的 fat jar（包含所有依赖）,
+                            适合作为可部署的应用程序，不适合作为依赖包 -->
                             <goal>repackage</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <classifier>exec</classifier>
+                    <classifier>exec</classifier> <!-- 保留不含依赖的jar，作为依赖包 -->
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
@@ -47,6 +71,7 @@
                 </configuration>
             </plugin>
 		</plugins>
+
 	</build>
 
 </project>

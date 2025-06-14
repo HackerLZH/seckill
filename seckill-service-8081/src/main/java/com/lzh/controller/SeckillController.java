@@ -7,11 +7,8 @@ import com.lzh.service.ISeckillService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,12 +17,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 
 
-@Tag(name = "Seck Controller")
+@Tag(name = "秒杀接口")
 @RestController
 public class SeckillController {
     @Autowired
     private ISeckillService seckillService;
-    @Operation(summary = "TEST")
+
     @GetMapping("/test")
     public Result test() {
         return Result.success("test");
@@ -37,17 +34,14 @@ public class SeckillController {
      * @return
      * //TODO: 不通过HttpServletRequest获取用户id
      */
-    @Operation(
-        summary = "kill goods"
-    )
-    @Parameters({
-        // 添加请求头
-        @Parameter(in = ParameterIn.HEADER, name = "userId", schema = @Schema(type = "Integer"))
-    })
-    @PostMapping("/{id}")
-    public Result kill(@PathVariable("id") Integer killId, HttpServletRequest request) {
-        Integer userId = Integer.parseInt(request.getHeader("userId"));
-        return seckillService.kill(killId, userId);
+    @Operation(summary = "秒杀")
+    @PostMapping("/id/{id}")
+    public Result kill(
+        @Parameter(name = "id", description = "秒杀id", required = true, in = ParameterIn.PATH)
+        @PathVariable("id") Integer killId) {
+        // Integer userId = Integer.parseInt(request.getHeader("userId"));
+        // return seckillService.kill(killId, userId);
+        return null;
     }
     
 }

@@ -15,7 +15,7 @@ import com.lzh.mapper.GoodsKillMapper;
 import com.lzh.mapper.GoodsKillOrderMapper;
 import com.lzh.response.Result;
 import com.lzh.service.ISeckillService;
-import com.lzh.utils.Constants;
+import com.lzh.utils.SeckillConstants;
 import com.lzh.utils.RedisUtil;
 
 import cn.hutool.core.lang.Snowflake;
@@ -72,8 +72,8 @@ public class SeckillServiceImpl implements ISeckillService {
                 .build();
         // MQ异步处理订单
         rabbitTemplate.convertAndSend(
-            Constants.MQ_KILL_GOOD_EXCHANGE
-            , Constants.MQ_KILL_GOOD_ROUTE
+            SeckillConstants.MQ_KILL_GOOD_EXCHANGE
+            , SeckillConstants.MQ_KILL_GOOD_ROUTE
             , goodsKillOrder
         );
     
@@ -85,16 +85,16 @@ public class SeckillServiceImpl implements ISeckillService {
     public void saveOrder(GoodsKillOrder order) {
         try {
             String orderId = String.valueOf(order.getOrderId());
-            if (redisUtil.sismember(Constants.SECKILL_ORDER_KILLED + order.getGoodsKillId(), orderId)) {
+            if (redisUtil.sismember(SeckillConstants.SECKILL_ORDER_KILLED + order.getGoodsKillId(), orderId)) {
                 // 消息幂等
                 return;
             }
-            redisUtil.sadd(Constants.SECKILL_ORDER_KILLED + order.getGoodsKillId(), orderId, 3L);
+            redisUtil.sadd(SeckillConstants.SECKILL_ORDER_KILLED + order.getGoodsKillId(), orderId, 3L);
             // 查询商品id
-            String goodsId = redisUtil.get(Constants.CACHE_GOODSID_KILLID + order.getGoodsKillId());
+            String goodsId = redisUtil.get(SeckillConstants.CACHE_GOODSID_KILLID + order.getGoodsKillId());
             if (Objects.isNull(goodsId)) {
                 redisUtil.set(
-                    Constants.CACHE_GOODSID_KILLID + order.getGoodsKillId()
+                    SeckillConstants.CACHE_GOODSID_KILLID + order.getGoodsKillId()
                     , String.valueOf(goodsKillMapper.findgoodsId(order.getGoodsKillId()))
                     , 3L);
             }
@@ -105,7 +105,7 @@ public class SeckillServiceImpl implements ISeckillService {
             goodsKillOrderMapper.insert(order);
         } catch (Exception ex) {
             // redis回滚
-            redisUtil.spop(Constants.SECKILL_ORDER_KILLED + order.getGoodsKillId(), order.getOrderId());
+            redisUtil.spop(SeckillConstants.SECKILL_ORDER_KILLED + order.getGoodsKillId(), order.getOrderId());
             throw new RuntimeException("下单失败!\t" + ex.getMessage());
         }
     }

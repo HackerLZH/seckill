@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.lzh.entity.GoodsKillOrder;
-import com.lzh.utils.Constants;
+import com.lzh.utils.SeckillConstants;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,7 +23,7 @@ public class RabbitConsumer {
      * @param order
      * //TODO: 监听器写的太简单了？
      */
-    @RabbitListener(queues = Constants.MQ_KILL_GOOD_QUEUE)
+    @RabbitListener(queues = SeckillConstants.MQ_KILL_GOOD_QUEUE)
     public void consumeKillGood(GoodsKillOrder order) { 
         try {
             seckikkillService.saveOrder(order);
@@ -34,8 +34,8 @@ public class RabbitConsumer {
         }
         // 进入订单支付倒计时（延时队列无消费者）
         rabbitTemplate.convertAndSend(
-            Constants.MQ_KILL_GOOD_ORDER_EXCHANGE
-            , Constants.MQ_KILL_GOOD_ORDER_ROUTE
+            SeckillConstants.MQ_KILL_GOOD_ORDER_EXCHANGE
+            , SeckillConstants.MQ_KILL_GOOD_ORDER_ROUTE
             , order);
     }
 
@@ -43,7 +43,7 @@ public class RabbitConsumer {
      * 订单支付超时处理
      * @param order
      */
-    @RabbitListener(queues = Constants.MQ_KILL_GOOD_DLX_QUEUE)
+    @RabbitListener(queues = SeckillConstants.MQ_KILL_GOOD_DLX_QUEUE)
     public void consumeKillGoodDLX(GoodsKillOrder order) {
         seckikkillService.processTimeOutOrder(order);
     }

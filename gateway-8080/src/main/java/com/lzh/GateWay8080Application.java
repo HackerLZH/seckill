@@ -2,10 +2,12 @@ package com.lzh;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
+@EnableDiscoveryClient
 @SpringBootApplication
-public class Nacos8847Application {
+public class GateWay8080Application {
     public static void main(String[] args) {
-        SpringApplication.run(Nacos8847Application.class, args);
+        SpringApplication.run(GateWay8080Application.class, args);
     }
 }

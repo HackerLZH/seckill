@@ -5,8 +5,8 @@ import org.springframework.context.annotation.Configuration;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
-import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 
 @Configuration
@@ -20,11 +20,12 @@ public class Myconfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Seckill API")
-                        .description("SpringBoot3 集成 Swagger3接口文档")
-                        .version("v1"))
-                .externalDocs(new ExternalDocumentation()
-                        .description("项目API文档")
-                        .url("/"));
+                        .contact(new Contact()
+                                        .name("HackerLZH")
+                                        .email("1064433607@qq.com")
+                                        .url("https://github.com/HackerLZH"))
+                        .description("秒杀服务")
+                        .version("v1"));
     }
 
     /**
