@@ -41,7 +41,7 @@ public class SeckillController {
         @PathVariable("id") Integer killId) {
         // Integer userId = Integer.parseInt(request.getHeader("userId"));
         // return seckillService.kill(killId, userId);
-        return null;
+        return Result.success();
     }
     
 }

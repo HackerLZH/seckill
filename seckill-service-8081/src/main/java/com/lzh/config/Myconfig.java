@@ -2,13 +2,18 @@ package com.lzh.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 
+//TODO：knife4j全局请求头
 @Configuration
 public class Myconfig {
     /**
@@ -25,7 +30,18 @@ public class Myconfig {
                                         .email("1064433607@qq.com")
                                         .url("https://github.com/HackerLZH"))
                         .description("秒杀服务")
-                        .version("v1"));
+                        .version("v1"))
+                // .addSecurityItem(new SecurityRequirement().addList(HttpHeaders.AUTHORIZATION))
+                .components(new Components().addSecuritySchemes(
+                                HttpHeaders.AUTHORIZATION,
+                                new SecurityScheme()
+                                        .name(HttpHeaders.AUTHORIZATION)
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("Bearer")
+                                        .in(SecurityScheme.In.HEADER)
+                                        .bearerFormat("JWT")
+                        )
+                );
     }
 
     /**
