@@ -1,7 +1,5 @@
 package com.lzh.entity;
 
-import java.time.LocalDateTime;
-
 import cn.hutool.core.annotation.Alias;
 import lombok.Builder;
 import lombok.Data;

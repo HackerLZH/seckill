@@ -46,7 +46,7 @@ public class UserServiceImpl implements IUserService{
         }
 
         // 生成token
-        String token = JwtUtil.createToken(username);
+        String token = JwtUtil.createToken(username, password);
 
         // TODO: LocalDateTime类型没有序列化
         // redis保存token

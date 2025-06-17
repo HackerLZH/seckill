@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
 import com.lzh.entity.UserRegisterDTO;
 import com.lzh.response.Result;
 import com.lzh.service.IUserService;
@@ -47,13 +48,7 @@ public class UserController {
     public Result register(@RequestBody UserRegisterDTO userdto) {
         log.info(userdto.toString());
         return userService.register(userdto);
-    }
-
-    // @Operation(summary = "用户注销")
-    // @PostMapping("/logout")
-    // public Result logout(HttpServletRequest request) {
-    //     return userService.logout(request.getHeader(Constants.TOKEN_HEADER));
-    // }    
+    }  
 
     @Operation(summary = "用户注销")
     @PostMapping("/logout")

@@ -16,10 +16,13 @@ import com.lzh.mapper.GoodsKillOrderMapper;
 import com.lzh.response.Result;
 import com.lzh.service.ISeckillService;
 import com.lzh.utils.SeckillConstants;
+import com.lzh.utils.UserHolder;
 import com.lzh.utils.RedisUtil;
 
 import cn.hutool.core.lang.Snowflake;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class SeckillServiceImpl implements ISeckillService {
     @Autowired
@@ -40,8 +43,8 @@ public class SeckillServiceImpl implements ISeckillService {
     }
 
     @Override
-    public Result kill(Integer killId, Integer userId) {
-        // TODO: 通过ThreadLocal获取用户id
+    public Result kill(Integer killId) {
+        Integer userId = UserHolder.getUser().getId();
         // 使用lua脚本实现 扣减库存+一人一单， 保证原子性
         long res = (long) redisUtil.execute(
             SECK_SCRIPT

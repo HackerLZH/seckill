@@ -32,7 +32,6 @@ public class TokenInterceptor implements HandlerInterceptor {
         }
         // 获取登录用户信息
         User user = JSONUtil.toBean(redisUtil.get(Constants.TOKEN_KEY + token), User.class);
-        System.out.println(user);
         UserHolder.saveUser(user);
         return true;
     }

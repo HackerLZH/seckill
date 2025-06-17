@@ -32,16 +32,13 @@ public class SeckillController {
      * 秒杀
      * @param id 秒杀id
      * @return
-     * //TODO: 不通过HttpServletRequest获取用户id
      */
     @Operation(summary = "秒杀")
     @PostMapping("/id/{id}")
     public Result kill(
         @Parameter(name = "id", description = "秒杀id", required = true, in = ParameterIn.PATH)
         @PathVariable("id") Integer killId) {
-        // Integer userId = Integer.parseInt(request.getHeader("userId"));
-        // return seckillService.kill(killId, userId);
-        return Result.success();
+        return seckillService.kill(killId);
     }
     
 }

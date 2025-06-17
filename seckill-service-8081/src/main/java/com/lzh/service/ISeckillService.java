@@ -7,10 +7,9 @@ public interface ISeckillService {
     /**
      * 秒杀
      * @param killId
-     * @param userId
      * @return
      */
-    Result kill(Integer killId, Integer userId);
+    Result kill(Integer killId);
     /**
      * 下订单
      * @param order

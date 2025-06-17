@@ -1,7 +1,5 @@
 package com.lzh.utils;
 
-import java.util.Date;
-
 import cn.hutool.jwt.JWT;
 
 /**
@@ -14,13 +12,14 @@ public class JwtUtil {
     // 过期时间 7天
     // private static final long EXPIRE = 7 * 24 * 3600;
     /**
-     * 根据用户名生成token
+     * 根据用户名和密码生成token
      * @param username
      * @return
      */
-    public static String createToken(String username) {
+    public static String createToken(String username, String password) {
         return JWT.create()
                 .setPayload("username", username)
+                .setPayload("password", password)
                 .setKey(KEY.getBytes())
                 // .setExpiresAt(new Date(System.currentTimeMillis() + EXPIRE * 1000))
                 .sign();
