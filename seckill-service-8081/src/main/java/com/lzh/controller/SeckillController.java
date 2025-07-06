@@ -34,7 +34,7 @@ public class SeckillController {
      * @return
      */
     @Operation(summary = "秒杀")
-    @PostMapping("/id/{id}")
+    @PostMapping("/kill/{id}")
     public Result kill(
         @Parameter(name = "id", description = "秒杀id", required = true, in = ParameterIn.PATH)
         @PathVariable("id") Integer killId) {
