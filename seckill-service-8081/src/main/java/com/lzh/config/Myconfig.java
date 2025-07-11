@@ -81,7 +81,7 @@ public class Myconfig {
      */
     @Bean
     Snowflake snowflake() {
-        return IdUtil.getSnowflake(1, 1);
+        return IdUtil.getSnowflake();
     }
 
     /**

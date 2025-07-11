@@ -1,6 +1,7 @@
 package com.lzh.utils;
 
-public class SeckillConstants {
+public final class SeckillConstants {
+    private SeckillConstants() {}
     // Redis Key
     // 秒杀库存
     public static final String SECKILL_STORE_KEY = "seckill:stock:";

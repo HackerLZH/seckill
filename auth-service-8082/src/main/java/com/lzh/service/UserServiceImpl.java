@@ -6,11 +6,12 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.lzh.entity.User;
+import com.alibaba.cloud.nacos.annotation.NacosConfig;
+import com.lzh.entity.UserInfo;
 import com.lzh.entity.UserRegisterDTO;
 import com.lzh.mapper.UserMapper;
 import com.lzh.response.Result;
-import com.lzh.util.UserHolder;
+import com.lzh.utils.UserHolder;
 import com.lzh.utils.Constants;
 import com.lzh.utils.JwtUtil;
 import com.lzh.utils.RedisUtil;
@@ -24,6 +25,8 @@ public class UserServiceImpl implements IUserService{
     @Autowired
     private RedisUtil redisUtil;
 
+    @NacosConfig(dataId = "common.yml", group = "EXT_GROUP", key = "token.timeout")
+    private Integer tokenTimeout;
     @Override
     public Result login(String username, String password) {
         // 判断是否已登录
@@ -35,7 +38,7 @@ public class UserServiceImpl implements IUserService{
             return Result.fail("用户名或密码不能为空");
         }
         // 用户名是否存在
-        User user = userMapper.getUserByName(username);
+        UserInfo user = userMapper.getUserByName(username);
         if (Objects.isNull(user)) {
             return Result.fail("用户不存在");
         }
@@ -48,9 +51,8 @@ public class UserServiceImpl implements IUserService{
         // 生成token
         String token = JwtUtil.createToken(username, password);
 
-        // TODO: LocalDateTime类型没有序列化
         // redis保存token
-        redisUtil.set(Constants.TOKEN_KEY + token, user, Constants.TOKEN_TIMEOUT);
+        redisUtil.set(Constants.TOKEN_KEY + token, user, tokenTimeout);
         
         return Result.success(token);
     }
@@ -81,7 +83,7 @@ public class UserServiceImpl implements IUserService{
         // TODO: 密码加密
 
         // 保存用户
-        User user = new User();
+        UserInfo user = new UserInfo();
         BeanUtil.copyProperties(userdto, user);
         user.setCreateTime(LocalDateTime.now());
         userMapper.save(user);

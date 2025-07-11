@@ -1,27 +1,48 @@
 version: "3"
 
 services:
-  # seckill:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   image: lzh/seckill:latest
-  #   container_name: seckill
-  #   # restart: always
-  #   environment:
-  #     - TZ=Asia/Shanghai
-  #   ports:
-  #     - "8081:8081"
-  #   networks:
-  #     - seckill
-  #   depends_on:
-  #     - mysql
-  #     - redis
-  #     - rabbitmq
+  gateway:
+    build:
+      context: ./gateway-8080
+      dockerfile: Dockerfile
+    image: lzh/gateway:latest
+    container_name: gateway
+    restart: on-failure
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "8080:8080"
+    networks:
+      - seckill
+  auth:
+    build:
+      context: ./auth-service-8082
+      dockerfile: Dockerfile
+    image: lzh/auth:latest
+    container_name: auth
+    restart: on-failure
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "8082:8082"
+    networks:
+      - seckill
+  seckill:
+    build:
+      context: ./seckill-service-8081
+      dockerfile: Dockerfile
+    image: lzh/seckill:latest
+    container_name: seckill
+    restart: on-failure
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "8081:8081"
+    networks:
+      - seckill
   redis:
     image: redis
     container_name: redis
-    # restart: always
     environment:
       - TZ=Asia/Shanghai
     ports:
@@ -36,11 +57,9 @@ services:
   mysql:
     image: mysql:8.0
     container_name: mysql
-    # restart: always
     environment:
       - TZ=Asia/Shanghai
       - MYSQL_ROOT_PASSWORD=123456
-      # - MYSQL_DATABASE=seckill
     ports:
       - "3306:3306"
     volumes:
@@ -57,7 +76,6 @@ services:
     image: rabbitmq:management
     container_name: rabbitmq
     hostname: rabbitserver
-    # restart: always
     environment:
       - TZ=Asia/Shanghai
       - RABBITMQ_DEFAULT_USER=admin
@@ -73,7 +91,6 @@ services:
   nginx:
     image: nginx:1.18.0
     container_name: nginx
-    # restart: always
     environment:
       - TZ=Asia/Shanghai
       - NGINX_PORT=80
@@ -90,7 +107,6 @@ services:
   nacos:
     image: nacos/nacos-server:v2.3.2
     container_name: nacos
-    # restart: always
     ports:
       # web 界面访问端口
       - 8848:8848

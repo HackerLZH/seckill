@@ -7,3 +7,11 @@
 - auth-service-8082: 认证微服务
 - seckill-service-8081: 秒杀微服务
 - common: 公共模块
+
+项目难点：
+- 库存超卖，一人一单，原子操作
+    - Redis Lua相比Redisson分布式锁的优势？
+- 消息队列异步下单，流量削峰
+- 熔断操作？
+- Redis对于LocalDateTime类型的序列化问题。引入jackson-datatype-jsr310，配置RedisTemplate的序列化方式，设置时间模块。
+- 网关聚合API文档

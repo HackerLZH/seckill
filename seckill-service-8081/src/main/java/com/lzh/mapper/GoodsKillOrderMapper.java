@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import com.lzh.entity.GoodsKillOrder;
+import com.lzh.enums.OrderStatus;
 
 @Mapper
 public interface GoodsKillOrderMapper {
@@ -15,8 +16,8 @@ public interface GoodsKillOrderMapper {
     void insert(GoodsKillOrder order);
 
     @Select("select status from goods_kill_order where order_id = #{orderId}")
-    Integer selectStatus(Long orderId);
+    OrderStatus selectStatus(Long orderId);
 
     @Update("update goods_kill_order set status = #{status} where order_id = #{orderId}")
-    void updateStatus(@Param("orderId") Long orderId, @Param("status") Integer status);
+    void updateStatus(@Param("orderId") Long orderId, @Param("status") OrderStatus status);
 }

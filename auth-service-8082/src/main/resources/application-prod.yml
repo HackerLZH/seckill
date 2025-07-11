@@ -1,0 +1,20 @@
+spring:  
+  config:
+    import:
+      - nacos:auth-service.yml
+      - nacos:dao.yml?group=EXT_GROUP
+      - nacos:redis-config.yml?group=EXT_GROUP
+  cloud:
+    nacos:
+      server-addr: nacos:8848
+      username: nacos
+      password: nacos
+      config:
+          namespace: 0a3a5563-ecb4-4d2b-af58-455a29ddaaf8
+          timeout: 5000
+          config-long-poll-timeout: 10000        
+          config-retry-time: 2000
+          max-retry: 3
+          refresh-enabled: true
+      discovery:
+          namespace: 0a3a5563-ecb4-4d2b-af58-455a29ddaaf8

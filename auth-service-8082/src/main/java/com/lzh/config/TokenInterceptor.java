@@ -6,12 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.lzh.entity.User;
-import com.lzh.util.UserHolder;
+import com.lzh.entity.UserInfo;
+import com.lzh.utils.UserHolder;
 import com.lzh.utils.Constants;
 import com.lzh.utils.RedisUtil;
 
-import cn.hutool.json.JSONUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -31,7 +30,7 @@ public class TokenInterceptor implements HandlerInterceptor {
             return true;
         }
         // 获取登录用户信息
-        User user = JSONUtil.toBean(redisUtil.get(Constants.TOKEN_KEY + token), User.class);
+        UserInfo user = (UserInfo)redisUtil.get(Constants.TOKEN_KEY + token);
         UserHolder.saveUser(user);
         return true;
     }

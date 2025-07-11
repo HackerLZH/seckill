@@ -1,5 +1,6 @@
 package com.lzh.service.impl;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lzh.entity.GoodsKillOrder;
+import com.lzh.enums.OrderStatus;
 import com.lzh.mapper.GoodsKillMapper;
 import com.lzh.mapper.GoodsKillOrderMapper;
 import com.lzh.response.Result;
@@ -48,8 +50,9 @@ public class SeckillServiceImpl implements ISeckillService {
         // 使用lua脚本实现 扣减库存+一人一单， 保证原子性
         long res = (long) redisUtil.execute(
             SECK_SCRIPT
-            , String.valueOf(userId)
-            , String.valueOf(killId)
+            , List.of(SeckillConstants.SECKILL_STORE_KEY, SeckillConstants.SECKILL_ORDER_KEY) // 传入keys
+            , String.valueOf(userId) // arg1
+            , String.valueOf(killId) // arg2
         );
 
         if (res == 1) {
@@ -58,21 +61,22 @@ public class SeckillServiceImpl implements ISeckillService {
         if (res == 2) {
             return Result.fail("一人一单");
         }
+
         long orderId = 0L;
         while (orderId == 0L) {
             try {
                 orderId = snowflake.nextId();
             } catch (IllegalStateException ise) {
-                //出现时钟回拨报错，那就重新生成一个id
+                // 无法容忍的时钟回拨，那就重新生成一个id
                 orderId = 0L;
             }
         }
         // 创建订单对象
         GoodsKillOrder goodsKillOrder = GoodsKillOrder.builder()
-                .orderId(orderId)
-                .userId(userId)
-                .goodsKillId(killId)
-                .build();
+                                                    .orderId(orderId)
+                                                    .userId(userId)
+                                                    .goodsKillId(killId)
+                                                    .build();
         // MQ异步处理订单
         rabbitTemplate.convertAndSend(
             SeckillConstants.MQ_KILL_GOOD_EXCHANGE
@@ -87,18 +91,18 @@ public class SeckillServiceImpl implements ISeckillService {
     @Override
     public void saveOrder(GoodsKillOrder order) {
         try {
-            String orderId = String.valueOf(order.getOrderId());
+            Long orderId = order.getOrderId();
             if (redisUtil.sismember(SeckillConstants.SECKILL_ORDER_KILLED + order.getGoodsKillId(), orderId)) {
                 // 消息幂等
                 return;
             }
             redisUtil.sadd(SeckillConstants.SECKILL_ORDER_KILLED + order.getGoodsKillId(), orderId, 3L);
             // 查询商品id
-            String goodsId = redisUtil.get(SeckillConstants.CACHE_GOODSID_KILLID + order.getGoodsKillId());
+            String goodsId = (String)redisUtil.get(SeckillConstants.CACHE_GOODSID_KILLID + order.getGoodsKillId());
             if (Objects.isNull(goodsId)) {
                 redisUtil.set(
                     SeckillConstants.CACHE_GOODSID_KILLID + order.getGoodsKillId()
-                    , String.valueOf(goodsKillMapper.findgoodsId(order.getGoodsKillId()))
+                    , goodsKillMapper.findgoodsId(order.getGoodsKillId())
                     , 3L);
             }
             // 扣减库存
@@ -116,10 +120,10 @@ public class SeckillServiceImpl implements ISeckillService {
     @Override
     public void processTimeOutOrder(GoodsKillOrder order) {
         // 查询订单状态
-        Integer status = goodsKillOrderMapper.selectStatus(order.getOrderId());
-        // 如果为0（待付款），则更改为2（已取消），然后恢复秒杀库存
-        Optional.ofNullable(status).filter(s -> s == 0).ifPresent(s -> {
-            goodsKillOrderMapper.updateStatus(order.getOrderId(), 2);
+        OrderStatus status = goodsKillOrderMapper.selectStatus(order.getOrderId());
+        // 如果为WAIT（待付款），则更改为CANCEL（已取消），然后恢复秒杀库存
+        Optional.ofNullable(status).filter(s -> s == OrderStatus.WAIT).ifPresent(s -> {
+            goodsKillOrderMapper.updateStatus(order.getOrderId(), OrderStatus.CANCEL);
             goodsKillMapper.addStock(order.getGoodsKillId(), 1);
         });
     }

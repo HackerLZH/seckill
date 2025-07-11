@@ -3,6 +3,8 @@ package com.lzh.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.lzh.enums.OrderStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +18,7 @@ public class GoodsKillOrder implements Serializable{
     private Long orderId;
     private Integer userId;
     private Integer goodsKillId;
-    private Integer status;
+    private OrderStatus status;
     private LocalDateTime createTime;
+    private LocalDateTime payTime;
 }

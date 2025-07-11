@@ -5,7 +5,9 @@ import cn.hutool.jwt.JWT;
 /**
  * Hutool-jwt工具类
  */
-public class JwtUtil {
+public final class JwtUtil {
+    private JwtUtil() {
+    }
     // 密钥
     private static final String KEY = "lzh";
 

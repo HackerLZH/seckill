@@ -2,6 +2,8 @@ package com.lzh.entity;
 
 import java.time.LocalDateTime;
 
+import com.lzh.enums.ActiveStatus;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,5 +16,5 @@ public class GoodsKill {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private LocalDateTime createTime;
-    private Integer isActive;
+    private ActiveStatus isActive;
 }

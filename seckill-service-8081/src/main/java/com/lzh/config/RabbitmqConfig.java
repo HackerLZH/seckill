@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.alibaba.cloud.nacos.annotation.NacosConfig;
 import com.lzh.utils.SeckillConstants;
 
 import lombok.extern.slf4j.Slf4j;
@@ -93,13 +94,15 @@ public class RabbitmqConfig {
         return BindingBuilder.bind(seckillGoodQueue()).to(seckillGoodExchange()).with(SeckillConstants.MQ_KILL_GOOD_ROUTE);
     }
 
+    @NacosConfig(dataId = "seckill-service.yml", group = "DEFAULT_GROUP", key = "order.timeout")
+    Integer orderTimeout;
 
     // 下单成功后进入延迟队列
     @Bean
     Queue seckillGoodOrderQueue(){
         // 关联死信队列
         Map<String, Object> argsMap= new HashMap<>();
-        argsMap.put("x-message-ttl", 10000); // 假设订单存在10秒超时，则进入死信队列
+        argsMap.put("x-message-ttl", orderTimeout); // 订单超时，则进入死信队列
         argsMap.put("x-dead-letter-exchange", SeckillConstants.MQ_KILL_GOOD_DLX_EXCHANGE);
         argsMap.put("x-dead-letter-routing-key", SeckillConstants.MQ_KILL_GOOD_DLX_ROUTE);
         return new Queue(SeckillConstants.MQ_KILL_GOOD_ORDER_QUEUE, true, false, false, argsMap);

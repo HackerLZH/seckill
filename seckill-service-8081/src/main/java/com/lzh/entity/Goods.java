@@ -3,6 +3,8 @@ package com.lzh.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.lzh.enums.ActiveStatus;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -14,5 +16,5 @@ public class Goods {
     private BigDecimal price;
     private Integer stock;
     private LocalDateTime createTime;
-    private Integer isActive;
+    private ActiveStatus isActive;
 }

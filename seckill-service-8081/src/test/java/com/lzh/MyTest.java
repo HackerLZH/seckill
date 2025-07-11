@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.lzh.entity.UserInfo;
+import com.lzh.utils.RedisUtil;
+
 import cn.hutool.core.lang.Snowflake;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 public class MyTest {
     @Autowired
     Snowflake snowflake;
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Test
     public void test() {    
@@ -30,5 +35,11 @@ public class MyTest {
     @Test
     public void test_LocaDateTime() {
         log.info("{}", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+    }
+
+    @Test
+    public void test_Redis_get() {
+        UserInfo user = (UserInfo)redisUtil.get("user");
+        System.out.println(user);
     }
 }

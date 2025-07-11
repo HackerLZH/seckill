@@ -8,6 +8,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.cloud.nacos.annotation.NacosConfig;
 import com.lzh.utils.Constants;
 import com.lzh.utils.JwtUtil;
 import com.lzh.utils.RedisUtil;
@@ -24,6 +25,10 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtAuthenticationGatewayFilterFactory.Config>{
     @Autowired
     private RedisUtil redisUtil;
+    
+    @NacosConfig(dataId = "common.yml", group = "EXT_GROUP", key = "token.timeout")
+    private Integer tokenTimeout;
+
 
     public JwtAuthenticationGatewayFilterFactory() {
         super(Config.class);
@@ -51,7 +56,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
                 return exchange.getResponse().setComplete();
             }
             // 刷新token，重置有效期
-            redisUtil.expire(Constants.TOKEN_KEY + token, Constants.TOKEN_TIMEOUT);
+            redisUtil.expire(Constants.TOKEN_KEY + token, tokenTimeout);
             // token传递到下游微服务
             return chain.filter(exchange);
         };
