@@ -15,4 +15,5 @@ ENTRYPOINT ["java" \
             , "-XX:ConcGCThreads=2" \
             , "-Xlog:gc*:file=gc.log:level,tags,time,uptime:filecount=5,filesize=10M:async" \
             , "-jar" \
-            ,"app.jar"]
+            , "app.jar" \
+            , "--spring.profiles.active=dev"]

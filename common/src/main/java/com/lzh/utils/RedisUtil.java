@@ -1,11 +1,16 @@
 package com.lzh.utils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
@@ -29,6 +34,20 @@ public class RedisUtil {
 
     public Object get(String key) {
         return redisTemplate.opsForValue().get(key);
+    }
+
+    public Map<String, Object> search(String pattern) {
+        Map<String, Object> loginUserMap = new HashMap<>();
+        ScanOptions options = ScanOptions.scanOptions().match(pattern).build();
+
+        try (Cursor<byte[]> cursor = redisTemplate.getConnectionFactory().getConnection().scan(options)) {
+            while (cursor.hasNext()) {
+                String key = new String(cursor.next());
+                loginUserMap.put(key.substring(11), get(key));
+            }
+        }
+
+        return loginUserMap;
     }
 
     public Boolean exists(String key) {

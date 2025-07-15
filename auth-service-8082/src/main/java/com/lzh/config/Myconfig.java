@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 
 import com.lzh.entity.NacosApidocConfig;
+import com.lzh.utils.Constants;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -37,9 +38,9 @@ public class Myconfig {
                         .description(config.getDescription())
                         .version(config.getVersion()))
                 .components(new Components().addSecuritySchemes(
-                                HttpHeaders.AUTHORIZATION,
+                                Constants.TOKEN_HEADER,
                                 new SecurityScheme()
-                                        .name(HttpHeaders.AUTHORIZATION)
+                                        .name(Constants.TOKEN_HEADER)
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("Bearer")
                                         .in(SecurityScheme.In.HEADER)
@@ -67,7 +68,7 @@ public class Myconfig {
                     // 接口添加鉴权参数
                     pathItem.readOperations()
                             .forEach(operation ->
-                                    operation.addSecurityItem(new SecurityRequirement().addList(HttpHeaders.AUTHORIZATION))
+                                    operation.addSecurityItem(new SecurityRequirement().addList(Constants.TOKEN_HEADER))
                             );
                 });
             }

@@ -1,21 +1,21 @@
 spring:
   application:
-    name: auth-service
+    name: admin-service
 
 ---
 server:
-  port: 8082
+  port: 8083
   servlet:
-    context-path: /auth
+    context-path: /admin
 spring:  
   config:
     activate:
       on-profile:
       - dev
     import:
-      - nacos:auth-service.yml
       - nacos:dao.yml?group=EXT_GROUP
       - nacos:redis-config.yml?group=EXT_GROUP
+      - nacos:admin-service.yml
       - nacos:common.yml?group=EXT_GROUP
   cloud:
     nacos:
@@ -33,18 +33,18 @@ spring:
           namespace: d53d08fa-7aab-4b26-975d-410cfc15983b
 ---
 server:
-  port: 8082
+  port: 8083
   servlet:
-    context-path: /auth
+    context-path: /admin
 spring:  
   config:
     activate:
       on-profile:
       - prod
     import:
-      - nacos:auth-service.yml
       - nacos:dao.yml?group=EXT_GROUP
       - nacos:redis-config.yml?group=EXT_GROUP
+      - nacos:admin-service.yml
       - nacos:common.yml?group=EXT_GROUP
   cloud:
     nacos:

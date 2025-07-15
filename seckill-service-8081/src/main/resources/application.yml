@@ -1,11 +1,74 @@
-server:
-  port: 8081
-  servlet:
-    # basepath
-    context-path: /seckill
-
 spring:
   application:
       name: seckill-service
-  profiles:
-    active: prod
+
+---
+server:
+  port: 8081
+  servlet:
+    context-path: /seckill
+spring:
+  config:
+    activate:
+      on-profile:
+      - dev
+    import:
+      - nacos:seckill-service.yml
+      - nacos:dao.yml?group=EXT_GROUP
+      - nacos:redis-config.yml?group=EXT_GROUP
+      - nacos:rabbitmq-config.yml?group=EXT_GROUP
+      - nacos:common.yml?group=EXT_GROUP
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      username: nacos
+      password: nacos
+      config:
+          namespace: d53d08fa-7aab-4b26-975d-410cfc15983b
+          # 从Nacos读取配置项的超时时间, 单位是 ms，默认值 3000 毫秒
+          timeout: 5000
+          # 长轮询超时时间
+          config-long-poll-timeout: 10000        
+          # 轮询的重试时间
+          config-retry-time: 2000
+          # 长轮询最大重试次数
+          max-retry: 3
+          # 开启监听和自动刷新
+          refresh-enabled: true
+      discovery:
+          namespace: d53d08fa-7aab-4b26-975d-410cfc15983b
+---
+server:
+  port: 8081
+  servlet:
+    context-path: /seckill
+spring:
+  config:
+    activate:
+      on-profile:
+      - prod
+    import:
+      - nacos:seckill-service.yml
+      - nacos:dao.yml?group=EXT_GROUP
+      - nacos:redis-config.yml?group=EXT_GROUP
+      - nacos:rabbitmq-config.yml?group=EXT_GROUP
+      - nacos:common.yml?group=EXT_GROUP
+  cloud:
+    nacos:
+      server-addr: nacos:8848
+      username: nacos
+      password: nacos123456
+      config:
+          namespace: 0a3a5563-ecb4-4d2b-af58-455a29ddaaf8
+          # 从Nacos读取配置项的超时时间, 单位是 ms，默认值 3000 毫秒
+          timeout: 5000
+          # 长轮询超时时间
+          config-long-poll-timeout: 10000        
+          # 轮询的重试时间
+          config-retry-time: 2000
+          # 长轮询最大重试次数
+          max-retry: 3
+          # 开启监听和自动刷新
+          refresh-enabled: true
+      discovery:
+          namespace: 0a3a5563-ecb4-4d2b-af58-455a29ddaaf8

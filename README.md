@@ -15,3 +15,5 @@
 - 熔断操作？
 - Redis对于LocalDateTime类型的序列化问题。引入jackson-datatype-jsr310，配置RedisTemplate的序列化方式，设置时间模块。
 - 网关聚合API文档
+- 部署在frp内网穿透服务器上，对于frps和frpc的配置。
+- 开发时本地无法大量启动微服务，爆内存

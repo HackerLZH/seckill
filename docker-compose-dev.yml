@@ -4,7 +4,7 @@ services:
   gateway:
     build:
       context: ./gateway-8080
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-dev
     image: lzh/gateway:latest
     container_name: gateway
     restart: on-failure
@@ -17,7 +17,7 @@ services:
   auth:
     build:
       context: ./auth-service-8082
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-dev
     image: lzh/auth:latest
     container_name: auth
     restart: on-failure
@@ -30,7 +30,7 @@ services:
   seckill:
     build:
       context: ./seckill-service-8081
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-dev
     image: lzh/seckill:latest
     container_name: seckill
     restart: on-failure

@@ -1,8 +1,55 @@
-server:
-  port: 8080
-
 spring:
   application:
     name: gateway
-  profiles:
-    active: prod
+
+---
+server:
+  port: 8080
+spring:
+  config:
+    activate:
+      on-profile:
+      - dev
+    import:
+      - nacos:gateway.yml
+      - nacos:redis-config.yml?group=EXT_GROUP
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      username: nacos
+      password: nacos
+      config:
+          namespace: d53d08fa-7aab-4b26-975d-410cfc15983b
+          timeout: 5000
+          config-long-poll-timeout: 10000        
+          config-retry-time: 2000
+          max-retry: 3
+          refresh-enabled: true
+      discovery:
+          namespace: d53d08fa-7aab-4b26-975d-410cfc15983b
+
+---
+server:
+  port: 8080
+spring:
+  config:
+    activate:
+      on-profile:
+      - prod
+    import:
+      - nacos:gateway.yml
+      - nacos:redis-config.yml?group=EXT_GROUP
+  cloud:
+    nacos:
+      server-addr: nacos:8848
+      username: nacos
+      password: nacos123456
+      config:
+          namespace: 0a3a5563-ecb4-4d2b-af58-455a29ddaaf8
+          timeout: 5000
+          config-long-poll-timeout: 10000        
+          config-retry-time: 2000
+          max-retry: 3
+          refresh-enabled: true
+      discovery:
+          namespace: 0a3a5563-ecb4-4d2b-af58-455a29ddaaf8

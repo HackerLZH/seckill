@@ -1,5 +1,6 @@
 package com.lzh.config;
 
+import org.apache.tomcat.util.bcel.classfile.Constant;
 import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -9,8 +10,6 @@ import org.springframework.http.HttpHeaders;
 import com.lzh.entity.NacosApidocConfig;
 import com.lzh.utils.Constants;
 
-import cn.hutool.core.lang.Snowflake;
-import cn.hutool.core.util.IdUtil;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -18,11 +17,11 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
-// TODO: 动态注入knife4j的配置
 @Configuration
 public class Myconfig {
     @Autowired
     private NacosApidocConfig config;
+
     /**
      * API文档
      * @return
@@ -34,7 +33,7 @@ public class Myconfig {
                         .title(config.getTitle())
                         .contact(new Contact()
                                         .name(config.getAuthor())
-                                        .email(config.getAuthor())
+                                        .email(config.getEmail())
                                         .url(config.getUrl()))
                         .description(config.getDescription())
                         .version(config.getVersion()))
@@ -75,28 +74,4 @@ public class Myconfig {
             }
         };
     }
-
-    /**
-     * 生成雪花id
-     * @return
-     */
-    @Bean
-    Snowflake snowflake() {
-        return IdUtil.getSnowflake();
-    }
-
-    /**
-     * Redisson分布式锁
-     * @return
-     */
-    // @Bean
-    // RedissonClient redissoncClient() {
-    //     Config config = new Config();
-    //     config.useSingleServer()
-    //             .setAddress(String.format("redis://%s:%s"
-    //                 , env.getProperty("spring.data.redis.host")
-    //                 , env.getProperty("spring.data.redis.port")))
-    //             .setPassword(env.getProperty("spring.data.redis.password"));
-    //     return Redisson.create(config);
-    // }
 }

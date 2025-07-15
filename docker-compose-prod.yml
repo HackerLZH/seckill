@@ -1,0 +1,145 @@
+version: "3"
+
+services:
+  gateway:
+    build:
+      context: ./gateway-8080
+      dockerfile: Dockerfile-prod
+    image: lzh/gateway:latest
+    container_name: gateway
+    restart: on-failure
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "8080:8080"
+    networks:
+      - seckill
+  auth:
+    build:
+      context: ./auth-service-8082
+      dockerfile: Dockerfile-prod
+    image: lzh/auth:latest
+    container_name: auth
+    restart: on-failure
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "8082:8082"
+    networks:
+      - seckill
+  seckill:
+    build:
+      context: ./seckill-service-8081
+      dockerfile: Dockerfile-prod
+    image: lzh/seckill:latest
+    container_name: seckill
+    restart: on-failure
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "8081:8081"
+    networks:
+      - seckill
+  admin:
+    build:
+      context: ./admin-service-8083
+      dockerfile: Dockerfile-prod
+    image: lzh/admin:latest
+    container_name: admin
+    restart: on-failure
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "8083:8083"
+    networks:
+      - seckill
+  redis:
+    image: redis
+    container_name: redis
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "6379:6379"
+    volumes:
+      - /www/seckill/docker/redis/conf/redis.conf:/etc/redis/redis.conf
+      - /www/seckill/docker/redis/data:/data
+      - /www/seckill/docker/redis/log:/var/log/redis
+    networks:
+      - seckill
+    command: redis-server /etc/redis/redis.conf
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=mysql123456
+    ports:
+      - "3306:3306"
+    volumes:
+      - /www/seckill/docker/mysql/data:/var/lib/mysql
+      - /www/seckill/docker/mysql/log:/var/log/mysql
+      - /www/seckill/docker/mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - seckill
+    command: [
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci'
+    ]
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    restart: always
+    hostname: rabbitserver
+    environment:
+      - TZ=Asia/Shanghai
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=rabbitmq123456
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - /www/seckill/docker/rabbitmq/log:/var/log/rabbitmq
+      - /www/seckill/docker/rabbitmq/data:/var/lib/rabbitmq
+    networks:
+      - seckill
+  nginx:
+    image: nginx:1.18.0
+    container_name: nginx
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - NGINX_PORT=80
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /www/seckill/docker/nginx/html:/usr/share/nginx/html
+      - /www/seckill/docker/nginx/log:/var/log/nginx
+      - /www/seckill/docker/nginx/conf.d:/etc/nginx/conf.d
+    privileged: true
+    networks:
+      - seckill
+  nacos:
+    image: nacos/nacos-server:v2.3.2-slim
+    container_name: nacos
+    restart: always
+    ports:
+      # web 界面访问端口
+      - "8848:8848"
+      # 程序使用 grpc 连接的端口
+      - "9848:9848"
+    environment:
+      - TZ=Asia/Shanghai
+      - MODE=standalone
+    volumes:
+      - /www/seckill/docker/nacos/conf/application.properties:/home/nacos/conf/application.properties
+      - /www/seckill/docker/nacos/logs:/home/nacos/logs
+      - /www/seckill/docker/nacos/data:/home/nacos/data
+    networks:
+      - seckill  
+
+networks:
+  seckill:
+    driver: bridge
