@@ -1,20 +1,37 @@
-FROM joengenduvel/jre17
-LABEL author=lzh email=1064433607@qq.com
-
+FROM lzh/jre17_with_pinpoint_agent AS builder
+WORKDIR /builder
 ADD target/seckill-service-8081-0.0.1-SNAPSHOT-exec.jar app.jar
+RUN java -Djarmode=tools -jar app.jar extract --layers --destination extracted
+
+FROM lzh/jre17_with_pinpoint_agent
+LABEL author=lzh email=1064433607@qq.com
+WORKDIR /application
+COPY --from=builder /builder/extracted/dependencies/ ./
+COPY --from=builder /builder/extracted/spring-boot-loader/ ./
+COPY --from=builder /builder/extracted/snapshot-dependencies/ ./
+COPY --from=builder /builder/extracted/application/ ./
 
 EXPOSE 8081
+
 ENTRYPOINT ["java" \
+            # , "-javaagent:/pinpoint-agent-2.5.4/pinpoint-bootstrap.jar" \
+            # , "-Dpinpoint.agentId=gateway" \
+            # , "-Dpinpoint.applicationName=gateway" \
             , "-Xms512m" \
             , "-Xmx512m" \
-            # , "-Xmn200m" \
             , "-Xss256k" \
             , "-XX:MetaspaceSize=128m" \
             , "-XX:MaxMetaspaceSize=128m" \
             , "-XX:+UseG1GC" \
             , "-XX:ParallelGCThreads=8" \
             , "-XX:ConcGCThreads=2" \
-            , "-Xlog:gc*:file=gc.log:level,tags,time,uptime:filecount=5,filesize=10M:async" \
+            # OOM时自动生成heap dump文件
+            , "-XX:+HeapDumpOnOutOfMemoryError" \
+            , "-XX:HeapDumpPath=heapdump.hprof" \
+            , "-XX:ErrorFile=error.log" \
+            # gc日志
+            , "-Xlog:gc*:file=gc.log:level,tags,time,uptime:filecount=5,filesize=10M" \
+            , "-Xlog:async" \
+            , "-Dspring.profiles.active=prod" \
             , "-jar" \
-            , "app.jar" \
-            , "--spring.profiles.active=prod"]
+            , "app.jar"]
