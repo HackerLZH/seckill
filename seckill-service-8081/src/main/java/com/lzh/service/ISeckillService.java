@@ -1,7 +1,6 @@
 package com.lzh.service;
 
 import com.lzh.entity.GoodsKillOrder;
-import com.lzh.response.Result;
 
 public interface ISeckillService {
     /**
@@ -9,7 +8,7 @@ public interface ISeckillService {
      * @param killId
      * @return
      */
-    Result kill(Integer killId);
+    void kill(Integer killId);
     /**
      * 下订单
      * @param order

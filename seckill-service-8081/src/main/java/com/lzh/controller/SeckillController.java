@@ -2,7 +2,6 @@ package com.lzh.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lzh.response.Result;
 import com.lzh.service.ISeckillService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,8 +23,8 @@ public class SeckillController {
     private ISeckillService seckillService;
 
     @GetMapping("/test")
-    public Result test() {
-        return Result.success("test");
+    public void test() {
+        int i = 1 / 0;
     }
     
     /**
@@ -35,10 +34,10 @@ public class SeckillController {
      */
     @Operation(summary = "秒杀")
     @PostMapping("/kill/{id}")
-    public Result kill(
+    public void kill(
         @Parameter(name = "id", description = "秒杀id", required = true, in = ParameterIn.PATH)
         @PathVariable("id") Integer killId) {
-        return seckillService.kill(killId);
+        seckillService.kill(killId);
     }
     
 }

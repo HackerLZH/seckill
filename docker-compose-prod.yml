@@ -138,7 +138,9 @@ services:
       - /www/seckill/docker/nacos/logs:/home/nacos/logs
       - /www/seckill/docker/nacos/data:/home/nacos/data
     networks:
-      - seckill  
+      - seckill
+    depends_on:
+      - mysql
 
 networks:
   seckill:

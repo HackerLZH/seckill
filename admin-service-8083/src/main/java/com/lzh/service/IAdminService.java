@@ -1,17 +1,20 @@
 package com.lzh.service;
 
-import com.lzh.response.Result;
+import java.util.List;
+import java.util.Map;
+
+import com.lzh.entity.UserDTO1;
 
 public interface IAdminService {
 
-    Result getRegisterUsers();
+    List<UserDTO1> getRegisterUsers();
 
-	Result addUsers(Integer beginId, Integer endId);
+	void addUsers(Integer beginId, Integer endId);
 
-    Result loginUsers(Integer beginId, Integer endId);
+    void loginUsers(Integer beginId, Integer endId);
 
-    Result getLoginUsers();
+    Map<String, Object> getLoginUsers();
 
-    Result writeTokens();
+    void writeTokens();
 
 }

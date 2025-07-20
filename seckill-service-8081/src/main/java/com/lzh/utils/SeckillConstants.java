@@ -1,5 +1,7 @@
 package com.lzh.utils;
 
+import com.feiniaojin.gracefulresponse.defaults.DefaultResponseStatus;
+
 public final class SeckillConstants {
     private SeckillConstants() {}
     // Redis Key
@@ -22,4 +24,16 @@ public final class SeckillConstants {
     public static final String MQ_KILL_GOOD_DLX_QUEUE = "kill.good.dlx";
     public static final String MQ_KILL_GOOD_DLX_EXCHANGE = "kill.good.dlx";
     public static final String MQ_KILL_GOOD_DLX_ROUTE = "kill.good.dlx"; 
+
+        // Graceful Code
+    public static final class GracefulCode {
+        private GracefulCode() {}
+        public static final String STOCK_INSUFFICIENT_CODE = "530000";
+        public static final String STOCK_INSUFFICIENT_MESSAGE = "库存不足";
+        public static final String ORDER_EXIST_CODE = "530001";
+        public static final String ORDER_EXIST_MESSAGE = "您已下单";
+    }
+
+    public static final DefaultResponseStatus STOCK_INSUFFICIENT = new DefaultResponseStatus(GracefulCode.STOCK_INSUFFICIENT_CODE, GracefulCode.STOCK_INSUFFICIENT_MESSAGE);
+    public static final DefaultResponseStatus ORDER_EXIST = new DefaultResponseStatus(GracefulCode.ORDER_EXIST_CODE, GracefulCode.ORDER_EXIST_MESSAGE);
 }

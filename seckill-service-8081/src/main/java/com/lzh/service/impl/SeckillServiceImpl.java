@@ -11,11 +11,11 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.feiniaojin.gracefulresponse.GracefulResponse;
 import com.lzh.entity.GoodsKillOrder;
 import com.lzh.enums.OrderStatus;
 import com.lzh.mapper.GoodsKillMapper;
 import com.lzh.mapper.GoodsKillOrderMapper;
-import com.lzh.response.Result;
 import com.lzh.service.ISeckillService;
 import com.lzh.utils.SeckillConstants;
 import com.lzh.utils.UserHolder;
@@ -45,7 +45,7 @@ public class SeckillServiceImpl implements ISeckillService {
     }
 
     @Override
-    public Result kill(Integer killId) {
+    public void kill(Integer killId) {
         Integer userId = UserHolder.getUser().getId();
         // 使用lua脚本实现 扣减库存+一人一单， 保证原子性
         long res = (long) redisUtil.execute(
@@ -56,10 +56,10 @@ public class SeckillServiceImpl implements ISeckillService {
         );
 
         if (res == 1) {
-            return Result.fail("库存不足");
+            GracefulResponse.raiseException(SeckillConstants.STOCK_INSUFFICIENT);
         }
         if (res == 2) {
-            return Result.fail("一人一单");
+            GracefulResponse.raiseException(SeckillConstants.ORDER_EXIST);
         }
 
         long orderId = 0L;
@@ -83,8 +83,6 @@ public class SeckillServiceImpl implements ISeckillService {
             , SeckillConstants.MQ_KILL_GOOD_ROUTE
             , goodsKillOrder
         );
-    
-        return Result.success(orderId);
     }
 
     @Transactional

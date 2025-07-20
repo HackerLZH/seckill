@@ -4,10 +4,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.lzh.response.Result;
-
 @FeignClient(name = "auth-service", path = "auth")
 public interface AuthFeign {
     @RequestMapping("/login")
-    public Result login(@RequestParam("username") String username, @RequestParam("password") String password);
+    public void login(@RequestParam("username") String username, @RequestParam("password") String password);
 }

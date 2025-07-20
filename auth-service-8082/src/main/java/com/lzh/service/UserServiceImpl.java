@@ -6,11 +6,13 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.cloud.commons.lang.StringUtils;
 import com.alibaba.cloud.nacos.annotation.NacosConfig;
+import com.feiniaojin.gracefulresponse.GracefulResponse;
 import com.lzh.entity.UserInfo;
+import com.lzh.entity.UserLoginVO;
 import com.lzh.entity.UserRegisterDTO;
 import com.lzh.mapper.UserMapper;
-import com.lzh.response.Result;
 import com.lzh.utils.UserHolder;
 import com.lzh.utils.Constants;
 import com.lzh.utils.JwtUtil;
@@ -28,24 +30,20 @@ public class UserServiceImpl implements IUserService{
     @NacosConfig(dataId = "common.yml", group = "EXT_GROUP", key = "token.timeout")
     private Integer tokenTimeout;
     @Override
-    public Result login(String username, String password) {
+    public UserLoginVO login(String username, String password) {
         // 判断是否已登录
         if (!Objects.isNull(UserHolder.getUser())) {
-            return Result.fail("请勿重复登录");
-        }
-        // 字段不能为空
-        if (Objects.isNull(username) || Objects.isNull(password)) {
-            return Result.fail("用户名或密码不能为空");
+            GracefulResponse.raiseException(Constants.LOGIN_DUPICATE);
         }
         // 用户名是否存在
         UserInfo user = userMapper.getUserByName(username);
         if (Objects.isNull(user)) {
-            return Result.fail("用户不存在");
+            GracefulResponse.raiseException(Constants.NO_USER);
         }
 
         // 密码是否正确
         if (!password.equals(user.getPassword())) {
-            return Result.fail("密码错误");
+            GracefulResponse.raiseException(Constants.WRONG_PASSWORD);
         }
 
         // 生成token
@@ -54,31 +52,30 @@ public class UserServiceImpl implements IUserService{
         // redis保存token
         redisUtil.set(Constants.TOKEN_KEY + token, user, tokenTimeout);
         
-        return Result.success(token);
+        return UserLoginVO.builder().userId(user.getId()).token(token).build();
     }
 
     @Override
-    public Result logout(String token) {
+    public void logout(String token) {
         // 清理redis
         redisUtil.expire(Constants.TOKEN_KEY + token, 0);
-        return Result.success();
     }
 
     @Override
-    public Result register(UserRegisterDTO userdto) {
+    public void register(UserRegisterDTO userdto) {
         // 字段不能为空
-        if (Objects.isNull(userdto.getUsername()) || Objects.isNull(userdto.getPassword()) || Objects.isNull(userdto.getConfirmPassword())) {
-            return Result.fail("用户名或密码不能为空");
+        if (StringUtils.isBlank(userdto.getUsername()) || StringUtils.isBlank(userdto.getPassword()) || StringUtils.isBlank(userdto.getConfirmPassword())) {
+            GracefulResponse.raiseException(Constants.NOT_BLANK);
         }
         // 用户名不能重复
         if (!Objects.isNull(userMapper.getUserByName(userdto.getUsername()))) {
-            return Result.fail("用户名已存在");
+            GracefulResponse.raiseException(Constants.USER_EXIST);
         }
         // TODO: 密码校验
 
         // 密码一致
         if (!userdto.getPassword().equals(userdto.getConfirmPassword())) {
-            return Result.fail("密码不一致");
+            GracefulResponse.raiseException(Constants.PASSWORD_INCONSISTENT);
         }
         // TODO: 密码加密
 
@@ -87,7 +84,6 @@ public class UserServiceImpl implements IUserService{
         BeanUtil.copyProperties(userdto, user);
         user.setCreateTime(LocalDateTime.now());
         userMapper.save(user);
-        return Result.success(user);
     }
 
 }

@@ -3,6 +3,9 @@ package com.lzh;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.feiniaojin.gracefulresponse.EnableGracefulResponse;
+
+@EnableGracefulResponse
 @SpringBootApplication
 public class Auth8082Application {
     public static void main(String[] args) {

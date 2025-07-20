@@ -2,11 +2,15 @@ package com.lzh.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lzh.response.Result;
+import com.lzh.entity.UserDTO1;
 import com.lzh.service.IAdminService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,37 +27,37 @@ public class AdminController {
 
     @Operation(summary = "test")
     @GetMapping("/test")
-    public Result test() {
-        return Result.success();
+    public Map<String, Object> test() {
+        return Collections.singletonMap("data", "test");
     }
     
     @Operation(summary = "获取所有注册用户")
     @GetMapping("/register_users")
-    public Result getRegisterUsers() {
+    public List<UserDTO1> getRegisterUsers() {
         return adminService.getRegisterUsers();
     }
 
     @Operation(summary = "获取所有登录用户")
     @GetMapping("/login_users")
-    public Result getUsers() {
+    public Map<String, Object> getUsers() {
         return adminService.getLoginUsers();
     }
 
     @Operation(summary = "批量插入测试用户")
     @PostMapping("/add/{begin}/{end}")
-    public Result addUsers(@PathVariable("begin") Integer beginId, @PathVariable("end") Integer endId) {
-        return adminService.addUsers(beginId, endId);
+    public void addUsers(@PathVariable("begin") Integer beginId, @PathVariable("end") Integer endId) {
+        adminService.addUsers(beginId, endId);
     }
 
     @Operation(summary = "批量登录测试用户")
     @GetMapping("/login/{begin}/{end}")
-    public Result loginUsers(@PathVariable("begin") Integer beginId, @PathVariable("end") Integer endId) {
-        return adminService.loginUsers(beginId, endId);
+    public void loginUsers(@PathVariable("begin") Integer beginId, @PathVariable("end") Integer endId) {
+        adminService.loginUsers(beginId, endId);
     }
     
     @Operation(summary = "写出所有登录用户token")
     @GetMapping("/writetokens")
-    public Result writeToken() {
-        return adminService.writeTokens();
+    public void writeToken() {
+        adminService.writeTokens();
     }
 }

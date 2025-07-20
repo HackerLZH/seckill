@@ -31,7 +31,6 @@ public class TokenAndRoleInterceptor implements HandlerInterceptor {
         String token = request.getHeader(Constants.TOKEN_HEADER);
         // token不存在，说明是无需鉴权请求，放行
         if (Objects.isNull(token)) {
-            log.info("pass with no token.");
             return true;
         }
         UserInfo user = (UserInfo)redisUtil.get(Constants.TOKEN_KEY + token);

@@ -1,7 +1,8 @@
 package com.lzh.service;
 
+import com.lzh.entity.UserLoginVO;
 import com.lzh.entity.UserRegisterDTO;
-import com.lzh.response.Result;
+
 
 public interface IUserService {
     /**
@@ -10,19 +11,19 @@ public interface IUserService {
      * @param password
      * @return
      */
-    Result login(String username, String password);
+    UserLoginVO login(String username, String password);
 
     /**
      * 用户注册
      * @param userdto
      * @return
      */
-    Result register(UserRegisterDTO userdto);
+    void register(UserRegisterDTO userdto);
 
     /**
      * 用户注销
      * @return
      */
-    Result logout(String token);
+    void logout(String token);
 
 }
