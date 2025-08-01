@@ -1,6 +1,7 @@
 package com.lzh.service;
 
 import com.lzh.entity.GoodsKillOrder;
+import com.lzh.entity.GoodsKillVO;
 
 public interface ISeckillService {
     /**
@@ -19,4 +20,9 @@ public interface ISeckillService {
      * @param order
      */
     void processTimeOutOrder(GoodsKillOrder order);
+    /**
+     * 获取秒杀商品
+     * @return
+     */
+    GoodsKillVO getProducts();
 }

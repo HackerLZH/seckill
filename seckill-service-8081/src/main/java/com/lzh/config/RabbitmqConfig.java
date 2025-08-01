@@ -81,6 +81,8 @@ public class RabbitmqConfig {
     // 用于异步秒杀下单的消息队列
     @Bean
     Queue seckillGoodQueue(){
+        // Map<String,Object> mapArgs = new HashMap<String, Object>();
+        // mapArgs.put("x-message-ttl", 180000); // 3分钟过期 
         return new Queue(SeckillConstants.MQ_KILL_GOOD_QUEUE,true);
     }
 

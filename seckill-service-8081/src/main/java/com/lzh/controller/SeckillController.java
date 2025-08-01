@@ -2,6 +2,7 @@ package com.lzh.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lzh.entity.GoodsKillVO;
 import com.lzh.service.ISeckillService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,4 +41,9 @@ public class SeckillController {
         seckillService.kill(killId);
     }
     
+    @Operation(summary = "获取秒杀商品")
+    @GetMapping("/products")
+    public GoodsKillVO products() {
+        return seckillService.getProducts();
+    }
 }

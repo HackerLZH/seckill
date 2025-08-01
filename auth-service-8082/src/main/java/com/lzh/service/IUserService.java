@@ -1,7 +1,7 @@
 package com.lzh.service;
 
 import com.lzh.entity.UserLoginVO;
-import com.lzh.entity.UserRegisterDTO;
+import com.lzh.entity.UserDTO;
 
 
 public interface IUserService {
@@ -18,7 +18,7 @@ public interface IUserService {
      * @param userdto
      * @return
      */
-    void register(UserRegisterDTO userdto);
+    void register(UserDTO userdto);
 
     /**
      * 用户注销

@@ -1,7 +1,7 @@
 FROM lzh/jre17_with_pinpoint_agent AS builder
 WORKDIR /builder
-ADD target/admin-service-8083-0.0.1-SNAPSHOT-exec.jar app.jar
-RUN java -Djarmode=tools -jar app.jar extract --layers --destination extracted
+ADD target/admin-service-8083-0.0.1-SNAPSHOT-exec.jar admin.jar
+RUN java -Djarmode=tools -jar admin.jar extract --layers --destination extracted
 
 FROM lzh/jre17_with_pinpoint_agent
 LABEL author=lzh email=1064433607@qq.com
@@ -34,4 +34,4 @@ ENTRYPOINT ["java" \
             , "-Xlog:async" \
             , "-Dspring.profiles.active=prod" \
             , "-jar"\
-            , "app.jar"]
+            , "admin.jar"]

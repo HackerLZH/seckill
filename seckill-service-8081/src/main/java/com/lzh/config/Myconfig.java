@@ -4,9 +4,9 @@ import org.springdoc.core.customizers.GlobalOpenApiCustomizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
 
 import com.lzh.entity.NacosApidocConfig;
+import com.lzh.entity.NacosRedisConfig;
 import com.lzh.utils.Constants;
 
 import cn.hutool.core.lang.Snowflake;
@@ -23,6 +23,9 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 public class Myconfig {
     @Autowired
     private NacosApidocConfig config;
+    @Autowired
+    private NacosRedisConfig redis;
+
     /**
      * API文档
      * @return
@@ -93,10 +96,8 @@ public class Myconfig {
     // RedissonClient redissoncClient() {
     //     Config config = new Config();
     //     config.useSingleServer()
-    //             .setAddress(String.format("redis://%s:%s"
-    //                 , env.getProperty("spring.data.redis.host")
-    //                 , env.getProperty("spring.data.redis.port")))
-    //             .setPassword(env.getProperty("spring.data.redis.password"));
+    //             .setAddress(String.format("redis://%s:%s", redis.getHost(), redis.getPort()))
+    //             .setPassword(redis.getPassword());
     //     return Redisson.create(config);
     // }
 }

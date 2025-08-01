@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.feiniaojin.gracefulresponse.api.ValidationStatusCode;
 import com.lzh.entity.UserLoginVO;
-import com.lzh.entity.UserRegisterDTO;
+import com.lzh.entity.UserDTO;
 import com.lzh.service.IUserService;
 import com.lzh.utils.Constants;
 
@@ -38,23 +38,17 @@ public class UserController {
 
     @ValidationStatusCode(code = Constants.GracefulCode.NOT_BLANK_CODE)
     @Operation(summary = "用户登录")
-    @GetMapping("/login") // 目前的springboot版本@RequestParam必须带上参数
-    public UserLoginVO login(
-        @Parameter(name = "username", description = "用户名", required = true, in = ParameterIn.QUERY)
-        @NotBlank(message = Constants.GracefulCode.NOT_BLANK_MESSAGE)
-        @RequestParam("username") String username, 
-        @Parameter(name = "password", description = "密码", required = true, in = ParameterIn.QUERY)
-        @NotBlank(message = Constants.GracefulCode.NOT_BLANK_MESSAGE)
-        @RequestParam("password") String password) {
-
-        return userService.login(username, password);
+    @PostMapping("/login") // 目前的springboot版本@RequestParam必须带上参数
+    public UserLoginVO login(@RequestBody UserDTO userdto) {
+        return userService.login(userdto.getUsername(), userdto.getPassword());
     }
+    
 
     @Operation(summary = "用户注册")
     @PostMapping("/register") // 小心swagger的RequestBody，不要导错了！
-    public void register(@RequestBody UserRegisterDTO userdto) {
+    public void register(@RequestBody UserDTO userdto) {
         userService.register(userdto);
-    }  
+    }
 
     @Operation(summary = "用户注销")
     @PostMapping("/logout")

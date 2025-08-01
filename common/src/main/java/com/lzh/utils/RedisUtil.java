@@ -1,6 +1,5 @@
 package com.lzh.utils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -64,6 +64,10 @@ public class RedisUtil {
      */
     public Object execute(RedisScript script, List<String> keys, Object... args) {
         return stringRedisTemplate.execute(script, keys, args);
+    }
+
+    public <T> T execute(RedisCallback<T> callback) {
+        return redisTemplate.execute(callback);
     }
 
     /**

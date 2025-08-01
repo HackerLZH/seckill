@@ -11,7 +11,7 @@ import com.alibaba.cloud.nacos.annotation.NacosConfig;
 import com.feiniaojin.gracefulresponse.GracefulResponse;
 import com.lzh.entity.UserInfo;
 import com.lzh.entity.UserLoginVO;
-import com.lzh.entity.UserRegisterDTO;
+import com.lzh.entity.UserDTO;
 import com.lzh.mapper.UserMapper;
 import com.lzh.utils.UserHolder;
 import com.lzh.utils.Constants;
@@ -52,7 +52,7 @@ public class UserServiceImpl implements IUserService{
         // redis保存token
         redisUtil.set(Constants.TOKEN_KEY + token, user, tokenTimeout);
         
-        return UserLoginVO.builder().userId(user.getId()).token(token).build();
+        return UserLoginVO.builder().userId(user.getId()).username(user.getUsername()).token(token).build();
     }
 
     @Override
@@ -62,11 +62,11 @@ public class UserServiceImpl implements IUserService{
     }
 
     @Override
-    public void register(UserRegisterDTO userdto) {
+    public void register(UserDTO userdto) {
         // 字段不能为空
-        if (StringUtils.isBlank(userdto.getUsername()) || StringUtils.isBlank(userdto.getPassword()) || StringUtils.isBlank(userdto.getConfirmPassword())) {
-            GracefulResponse.raiseException(Constants.NOT_BLANK);
-        }
+        // if (StringUtils.isBlank(userdto.getUsername()) || StringUtils.isBlank(userdto.getPassword()) || StringUtils.isBlank(userdto.getConfirmPassword())) {
+        //     GracefulResponse.raiseException(Constants.NOT_BLANK);
+        // }
         // 用户名不能重复
         if (!Objects.isNull(userMapper.getUserByName(userdto.getUsername()))) {
             GracefulResponse.raiseException(Constants.USER_EXIST);
@@ -74,9 +74,9 @@ public class UserServiceImpl implements IUserService{
         // TODO: 密码校验
 
         // 密码一致
-        if (!userdto.getPassword().equals(userdto.getConfirmPassword())) {
-            GracefulResponse.raiseException(Constants.PASSWORD_INCONSISTENT);
-        }
+        // if (!userdto.getPassword().equals(userdto.getConfirmPassword())) {
+        //     GracefulResponse.raiseException(Constants.PASSWORD_INCONSISTENT);
+        // }
         // TODO: 密码加密
 
         // 保存用户
