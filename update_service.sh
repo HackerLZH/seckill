@@ -14,8 +14,8 @@ if [ $# -eq 0 ]; then
     docker rm gateway seckill auth admin
     mvn clean
     mvn package -DskipTests
-    dco -f docker-compose-prod.yml build gateway seckill auth admin
-    dco -f docker-compose-prod.yml up -d
+    dco build gateway seckill auth admin
+    dco up -d
 else
     # 更新某个微服务
     module="$1"
@@ -24,6 +24,6 @@ else
     docker rm "$service"
     mvn clean -pl "$module"
     mvn package -pl "$module" -am
-    dco -f docker-compose-prod.yml build "$service"
-    dco -f docker-compose-prod.yml up -d "$service"
+    dco build "$service"
+    dco up -d "$service"
 fi
