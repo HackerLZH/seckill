@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile-prod
     image: lzh/gateway:latest
     container_name: gateway
-    restart: on-failure
+    restart: no
     environment:
       - TZ=Asia/Shanghai
       - PORT=${GATEWAY_PORT:-8080}
@@ -21,7 +21,7 @@ services:
       dockerfile: Dockerfile-prod
     image: lzh/auth:latest
     container_name: auth
-    restart: on-failure
+    restart: no
     environment:
       - TZ=Asia/Shanghai
       - PORT=${AUTH_SERVICE_PORT:-8082}
@@ -35,7 +35,7 @@ services:
       dockerfile: Dockerfile-prod
     image: lzh/seckill:latest
     container_name: seckill
-    restart: on-failure
+    restart: no
     environment:
       - TZ=Asia/Shanghai
       - PORT=${SECKILL_SERVICE_PORT:-8081}
@@ -49,7 +49,7 @@ services:
       dockerfile: Dockerfile-prod
     image: lzh/admin:latest
     container_name: admin
-    restart: on-failure
+    restart: no
     environment:
       - TZ=Asia/Shanghai
       - PORT=${ADMIN_SERVICE_PORT:-8083}
@@ -60,7 +60,7 @@ services:
   redis:
     image: redis
     container_name: redis
-    restart: always
+    restart: no
     environment:
       - TZ=Asia/Shanghai
     ports:
@@ -75,7 +75,7 @@ services:
   mysql:
     image: mysql:8.0
     container_name: mysql
-    restart: always
+    restart: no
     environment:
       - TZ=Asia/Shanghai
       - MYSQL_ROOT_PASSWORD=mysql123456
@@ -94,7 +94,7 @@ services:
   rabbitmq:
     image: rabbitmq:management
     container_name: rabbitmq
-    restart: always
+    restart: no
     hostname: rabbitserver
     environment:
       - TZ=Asia/Shanghai
@@ -111,7 +111,7 @@ services:
   nginx:
     image: nginx:1.18.0
     container_name: nginx
-    restart: always
+    restart: no
     environment:
       - TZ=Asia/Shanghai
       - NGINX_PORT=${NGINX_HTTP_PORT:-80}
@@ -126,17 +126,21 @@ services:
     networks:
       - seckill
   nacos:
-    image: nacos/nacos-server:v2.3.2-slim
+    image: nacos/nacos-server:v3.1.1
     container_name: nacos
-    restart: always
+    restart: no
     ports:
       # web 界面访问端口
       - "8848:8848"
       # 程序使用 grpc 连接的端口
       - "9848:9848"
+      - "${NACOS_CONSOLE_PORT:-8080}:8080"
     environment:
       - TZ=Asia/Shanghai
       - MODE=standalone
+      - NACOS_AUTH_TOKEN=r1hVjHGtVhZdGyEqBHpJ1u24aMWFU9ueCac0zf4XTKk=
+      - NACOS_AUTH_IDENTITY_KEY=nacoskey
+      - NACOS_AUTH_IDENTITY_VALUE=nacosvalue
     volumes:
       - /www/seckill/docker/nacos/conf/application.properties:/home/nacos/conf/application.properties
       - /www/seckill/docker/nacos/logs:/home/nacos/logs
