@@ -3,7 +3,6 @@ LABEL author=lzh email=1064433607@qq.com
 
 ADD target/gateway-8080-0.0.1-SNAPSHOT-exec.jar app.jar
 
-EXPOSE 8080
 ENTRYPOINT ["java" \
             , "-Xms512m" \
             , "-Xmx512m" \
