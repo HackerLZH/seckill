@@ -11,6 +11,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - PORT=${GATEWAY_PORT:-8080}
+      - NACOS_USERNAME=${NACOS_USERNAME:-nacos}
+      - NACOS_PASSWORD=${NACOS_PASSWORD:-nacos}
     ports:
       - "${GATEWAY_PORT:-8080}:8080"
     networks:
