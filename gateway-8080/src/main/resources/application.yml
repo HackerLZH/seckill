@@ -30,7 +30,7 @@ spring:
 
 ---
 server:
-  port: 8080
+  port: ${PORT}
 spring:
   config:
     activate:

@@ -33,7 +33,7 @@ spring:
           namespace: d53d08fa-7aab-4b26-975d-410cfc15983b
 ---
 server:
-  port: 8083
+  port: ${PORT}
   servlet:
     context-path: /admin
 spring:  
