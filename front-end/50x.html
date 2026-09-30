@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>500 - 服务器内部错误</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      color: #1e293b;
+      padding: 20px;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 480px;
+      width: 100%;
+    }
+
+    .icon {
+      font-size: 72px;
+      line-height: 1;
+      margin-bottom: 8px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.85; }
+    }
+
+    .code {
+      font-size: clamp(64px, 16vw, 110px);
+      font-weight: 800;
+      line-height: 1;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-top: 16px;
+      color: #0f172a;
+    }
+
+    .desc {
+      font-size: 15px;
+      color: #64748b;
+      margin-top: 10px;
+      line-height: 1.6;
+    }
+
+    .actions {
+      margin-top: 28px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #dc2626;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+      background: #f1f5f9;
+      transform: translateY(-1px);
+    }
+
+    .status-list {
+      margin-top: 28px;
+      text-align: left;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .status-list p {
+      margin: 4px 0;
+    }
+
+    .status-list strong {
+      color: #334155;
+    }
+
+    .hint {
+      margin-top: 24px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #0f172a;
+        color: #e2e8f0;
+      }
+      .title { color: #f1f5f9; }
+      .desc { color: #94a3b8; }
+      .btn-secondary {
+        background: #1e293b;
+        color: #cbd5e1;
+        border-color: #334155;
+      }
+      .btn-secondary:hover {
+        background: #334155;
+      }
+      .status-list {
+        background: #1e293b;
+        border-color: #334155;
+        color: #94a3b8;
+      }
+      .status-list strong { color: #cbd5e1; }
+      .hint { color: #64748b; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">⚠️</div>
+    <div class="code">50x</div>
+    <h1 class="title">服务器内部错误</h1>
+    <p class="desc">
+      服务器在处理请求时遇到了问题，请稍后重试。<br>
+      如果问题持续存在，请联系网站管理员。
+    </p>
+
+    <div class="actions">
+      <button onclick="location.reload()" class="btn btn-primary">↻ 重新加载</button>
+      <a href="/" class="btn btn-secondary">返回首页</a>
+    </div>
+
+    <div class="status-list">
+      <p><strong>500</strong> — 服务器内部错误</p>
+      <p><strong>502</strong> — 网关错误</p>
+      <p><strong>503</strong> — 服务不可用</p>
+      <p><strong>504</strong> — 网关超时</p>
+    </div>
+
+    <p class="hint">错误代码：50x Server Error</p>
+  </div>
+</body>
+</html>
