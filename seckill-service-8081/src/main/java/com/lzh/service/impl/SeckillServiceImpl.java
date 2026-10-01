@@ -1,18 +1,6 @@
 package com.lzh.service.impl;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.lang.Snowflake;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.feiniaojin.gracefulresponse.GracefulResponse;
@@ -25,9 +13,18 @@ import com.lzh.service.ISeckillService;
 import com.lzh.utils.RedisUtil;
 import com.lzh.utils.SeckillConstants;
 import com.lzh.utils.UserHolder;
-
-import cn.hutool.core.lang.Snowflake;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -169,6 +166,7 @@ public class SeckillServiceImpl implements ISeckillService {
         List<GoodsKillVO.GoodsKillInfo> current = currentList.stream().map(item -> {
             GoodsKillVO.GoodsKillInfo info = new GoodsKillVO.GoodsKillInfo();
             info.setName(item.getName());
+            info.setImage(item.getImage());
             info.setPrice(item.getPrice());
             info.setStartTime(item.getStartTime());
             info.setStock(item.getStock());
