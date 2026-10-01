@@ -285,7 +285,11 @@
                                 <div class="progress-bar bg-danger" style="width: ${soldPercent}%"></div>
                             </div>
                             <small class="text-muted">已售${soldPercent}%，仅剩${product.availableStock}件</small>
-                            <button class="btn seckill-btn w-100 mt-2" onclick="checkLogin()">立即秒杀</button>
+                            <button class="${product.availableStock === 0? 'btn btn-outline-secondary w-100' : 'btn seckill-btn w-100 mt-2'}"
+                                onclick="checkLogin()"
+                                ${product.availableStock === 0? 'disabled' : ''}>
+                            立即秒杀
+                            </button>
                         </div>
                     </div>
                 `;
