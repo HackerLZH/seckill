@@ -1,6 +1,8 @@
 package com.lzh.service;
 
 import com.alibaba.cloud.nacos.annotation.NacosConfig;
+import com.lzh.entity.GoodsDTO;
+import com.lzh.entity.GoodsKillDTO;
 import com.lzh.entity.UserDTO1;
 import com.lzh.feign.AuthFeign;
 import com.lzh.mapper.AdminMapper;
@@ -66,5 +68,25 @@ public class AdminServiceImpl implements IAdminService {
                 }
             });
         } catch (IOException ie) {}
+    }
+
+    @Override
+    public void addGoods(GoodsDTO goodsDTO) {
+        try {
+            adminMapper.saveGoods(goodsDTO);
+            log.info("添加商品成功：{}", goodsDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void addKillGoods(GoodsKillDTO goodsKillDTO) {
+        try {
+            adminMapper.saveKillGoods(goodsKillDTO);
+            log.info("添加秒杀商品成功：{}", goodsKillDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

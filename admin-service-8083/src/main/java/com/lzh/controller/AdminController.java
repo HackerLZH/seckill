@@ -1,14 +1,13 @@
 package com.lzh.controller;
 
+import com.lzh.entity.GoodsDTO;
+import com.lzh.entity.GoodsKillDTO;
 import com.lzh.entity.UserDTO1;
 import com.lzh.service.IAdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -55,5 +54,17 @@ public class AdminController {
     @GetMapping("/writetokens")
     public void writeToken() {
         adminService.writeTokens();
+    }
+
+    @Operation(summary = "插入商品")
+    @PostMapping("/add/goods")
+    public void addGoods(@RequestBody GoodsDTO goodsDTO) {
+        adminService.addGoods(goodsDTO);
+    }
+
+    @Operation(summary = "插入秒杀商品")
+    @PostMapping("/add/kill/goods")
+    public void addKillGoods(@RequestBody GoodsKillDTO goodsKillDTO) {
+        adminService.addKillGoods(goodsKillDTO);
     }
 }
