@@ -1,13 +1,13 @@
 package com.lzh.service;
 
+import com.lzh.entity.UserDTO1;
+
 import java.util.List;
 import java.util.Map;
 
-import com.lzh.entity.UserDTO1;
-
 public interface IAdminService {
 
-    List<UserDTO1> getRegisterUsers();
+    List<UserDTO1> getTestUsers();
 
 	void addUsers(Integer beginId, Integer endId);
 

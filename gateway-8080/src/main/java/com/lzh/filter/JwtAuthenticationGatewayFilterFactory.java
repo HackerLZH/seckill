@@ -1,20 +1,18 @@
 package com.lzh.filter;
 
-import java.util.List;
-import java.util.Objects;
-
+import com.alibaba.cloud.nacos.annotation.NacosConfig;
+import com.lzh.utils.Constants;
+import com.lzh.utils.JwtUtil;
+import com.lzh.utils.RedisUtil;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.cloud.nacos.annotation.NacosConfig;
-import com.lzh.utils.Constants;
-import com.lzh.utils.JwtUtil;
-import com.lzh.utils.RedisUtil;
-
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -46,17 +44,20 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
             String token = exchange.getRequest().getHeaders().getFirst(Constants.TOKEN_HEADER);
             log.info(token);
             if (Objects.isNull(token) || !redisUtil.exists(Constants.TOKEN_KEY + token)) {
+                log.warn("token无效");
                 exchange.getResponse().setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             }
             // 校验token
             if (!JwtUtil.verify(token)) {
                 // 校验失败
+                log.warn("JWT校验失败");
                 exchange.getResponse().setStatusCode(org.springframework.http.HttpStatus.BAD_REQUEST);
                 return exchange.getResponse().setComplete();
             }
             // 刷新token，重置有效期
             redisUtil.expire(Constants.TOKEN_KEY + token, tokenTimeout);
+            log.info("分发请求");
             // token传递到下游微服务
             return chain.filter(exchange);
         };

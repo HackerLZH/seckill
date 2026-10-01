@@ -1,22 +1,20 @@
 package com.lzh.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.cloud.nacos.annotation.NacosConfig;
 import com.lzh.entity.UserDTO1;
 import com.lzh.feign.AuthFeign;
 import com.lzh.mapper.AdminMapper;
 import com.lzh.utils.RedisUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -29,8 +27,8 @@ public class AdminServiceImpl implements IAdminService {
     private RedisUtil redisUtil;
     
     @Override
-    public List<UserDTO1> getRegisterUsers() {
-        return adminMapper.findLast10Users();
+    public List<UserDTO1> getTestUsers() {
+        return adminMapper.findLast10TestUsers();
     }
 
     @Transactional
@@ -50,6 +48,7 @@ public class AdminServiceImpl implements IAdminService {
     }
     @Override
     public Map<String, Object> getLoginUsers() {
+        log.info("获取已登录用户");
         return redisUtil.search("USER:TOKEN:*");
     }
 
@@ -57,6 +56,7 @@ public class AdminServiceImpl implements IAdminService {
     private String tokensOutput;
     @Override
     public void writeTokens() {
+        log.info("写入文件：所有登录token");
         try(BufferedWriter br = new BufferedWriter(new FileWriter(tokensOutput))) {
             getLoginUsers().keySet().forEach(key -> {
                 try {

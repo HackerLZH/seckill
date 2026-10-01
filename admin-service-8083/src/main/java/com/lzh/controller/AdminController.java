@@ -1,22 +1,18 @@
 package com.lzh.controller;
 
-import org.springframework.web.bind.annotation.RestController;
-
 import com.lzh.entity.UserDTO1;
 import com.lzh.service.IAdminService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 
 @Tag(name = "管理员接口")
@@ -31,10 +27,10 @@ public class AdminController {
         return Collections.singletonMap("data", "test");
     }
     
-    @Operation(summary = "获取所有注册用户")
-    @GetMapping("/register_users")
-    public List<UserDTO1> getRegisterUsers() {
-        return adminService.getRegisterUsers();
+    @Operation(summary = "获取10个测试用户")
+    @GetMapping("/ten_test_users")
+    public List<UserDTO1> getTestUsers() {
+        return adminService.getTestUsers();
     }
 
     @Operation(summary = "获取所有登录用户")
