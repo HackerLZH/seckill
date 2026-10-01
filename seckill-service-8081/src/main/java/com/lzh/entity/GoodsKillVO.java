@@ -1,11 +1,11 @@
 package com.lzh.entity;
 
+import lombok.Builder;
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import lombok.Builder;
-import lombok.Data;
 
 /**
  * 秒杀商品视图
@@ -20,6 +20,7 @@ public class GoodsKillVO {
     public static class GoodsKillInfo { 
         private Integer id;
         private String name;
+        private String image;
         private BigDecimal price;
         private LocalDateTime startTime;
         private Integer stock; //秒杀库存

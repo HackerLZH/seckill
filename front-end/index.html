@@ -227,6 +227,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script>
+        let RQ_PREF = "";
+        if (window.location.hostname === "localhost") {
+            RQ_PREF = "http://localhost:8080"
+        } else {
+            RQ_PREF = "/api";
+        }
+
         // 页面加载时获取商品数据
         $(document).ready(function() {
             fetchSeckillProducts();
@@ -236,7 +243,7 @@
         function fetchSeckillProducts() {
             // 这里应该替换为实际的API端点
             $.ajax({
-                url: '/api/seckill/products',
+                url: `${RQ_PREF}/seckill/products`,
                 method: 'GET',
                 dataType: 'json',
                 success: function(response) {
@@ -322,7 +329,7 @@
             const password = $("#login-password").val();
 
             $.ajax({
-                url: '/api/auth/login',
+                url: `${RQ_PREF}/auth/login`,
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({
@@ -367,7 +374,7 @@
             
             // 发送注册请求
             $.ajax({
-                url: '/api/auth/register',
+                url: `${RQ_PREF}/auth/register`,
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({
@@ -391,7 +398,7 @@
         $('#logoutBtn').click(function(e) {
             e.preventDefault();
             $.ajax({
-                url: '/api/auth/logout',
+                url: `${RQ_PREF}/auth/logout`,
                 method: 'POST',
                 headers: {
                     [token_key]: localStorage.getItem('token')
