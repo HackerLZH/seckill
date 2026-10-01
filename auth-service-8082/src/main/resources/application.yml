@@ -4,7 +4,7 @@ spring:
 
 ---
 server:
-  port: 8082
+  port: ${PORT:8082}
   servlet:
     context-path: /auth
 spring:  
@@ -19,9 +19,9 @@ spring:
       - nacos:common.yml?group=EXT_GROUP
   cloud:
     nacos:
-      server-addr: localhost:8848
-      username: nacos
-      password: nacos
+      server-addr: ${DEV_SERVER}:8848
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
       config:
           namespace: d53d08fa-7aab-4b26-975d-410cfc15983b
           timeout: 5000
@@ -49,8 +49,8 @@ spring:
   cloud:
     nacos:
       server-addr: nacos:8848
-      username: nacos
-      password: nacos123456
+      username: ${NACOS_USERNAME}
+      password: ${NACOS_PASSWORD}
       config:
           namespace: 0a3a5563-ecb4-4d2b-af58-455a29ddaaf8
           timeout: 5000
