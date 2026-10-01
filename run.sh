@@ -9,4 +9,10 @@ export NACOS_PASSWORD=nacos123456
 
 if [ "$module" == "gateway" ]; then
     java -jar gateway-8080/target/gateway-8080-0.0.1-SNAPSHOT-exec.jar "$profile"
+elif [ "$module" == "auth" ]; then
+    java -jar auth-service-8082/target/auth-service-8082-0.0.1-SNAPSHOT-exec.jar "$profile"
+elif [ "$module" == "admin" ]; then
+    java -jar admin-service-8083/target/admin-service-8083-0.0.1-SNAPSHOT-exec.jar "$profile"
+elif [ "$module" == "seckill" ]; then
+    java -jar seckill-service-8081/target/seckill-service-8081-0.0.1-SNAPSHOT-exec.jar "$profile"
 fi
