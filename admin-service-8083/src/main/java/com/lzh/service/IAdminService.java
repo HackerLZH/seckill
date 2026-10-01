@@ -1,5 +1,7 @@
 package com.lzh.service;
 
+import com.lzh.entity.GoodsDTO;
+import com.lzh.entity.GoodsKillDTO;
 import com.lzh.entity.UserDTO1;
 
 import java.util.List;
@@ -17,4 +19,7 @@ public interface IAdminService {
 
     void writeTokens();
 
+    void addGoods(GoodsDTO goodsDTO);
+
+    void addKillGoods(GoodsKillDTO goodsKillDTO);
 }
