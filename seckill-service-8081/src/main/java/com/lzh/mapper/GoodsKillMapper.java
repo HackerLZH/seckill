@@ -37,7 +37,7 @@ public interface GoodsKillMapper {
             + "from goods g1 "
             + "inner join goods_kill g2 "
             + "on g1.id = g2.goods_id "
-            + "where now() >= g2.start_time")
+            + "where now() >= g2.start_time and now() < date_add(g2.end_time, interval 5 minute)")
     List<GoodsKillInfo> selectCurrent();
 
     /**

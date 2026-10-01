@@ -30,7 +30,7 @@ public class SeckillController {
     
     /**
      * 秒杀
-     * @param id 秒杀id
+     * @param {id} 秒杀id
      * @return
      */
     @Operation(summary = "秒杀")
