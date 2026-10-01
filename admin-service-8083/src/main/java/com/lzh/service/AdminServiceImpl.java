@@ -15,8 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -80,10 +83,23 @@ public class AdminServiceImpl implements IAdminService {
         }
     }
 
+    private static final String SECKILL_STORE_KEY = "seckill:stock:";
+    // 秒杀用户
+    private static final String SECKILL_ORDER_KEY = "seckill:order:";
+
     @Override
     public void addKillGoods(GoodsKillDTO goodsKillDTO) {
         try {
             adminMapper.saveKillGoods(goodsKillDTO);
+            if (goodsKillDTO.getStartTime().isBefore(LocalDateTime.now()) && goodsKillDTO.getEndTime().isAfter(LocalDateTime.now())) {
+                // 秒杀已经开始，写redis
+                redisUtil.set(SECKILL_STORE_KEY + goodsKillDTO.getId()
+                        , goodsKillDTO.getStock()
+                        // 剩余秒数作为ttl
+                        , Duration.between(LocalDateTime.now(), goodsKillDTO.getEndTime()).getSeconds()
+                        , TimeUnit.SECONDS
+                );
+            }
             log.info("添加秒杀商品成功：{}", goodsKillDTO);
         } catch (Exception e) {
             e.printStackTrace();

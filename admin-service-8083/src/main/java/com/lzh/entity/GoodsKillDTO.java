@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class GoodsKillDTO {
+    private Integer id; // kill id
     private Integer goodsId;
     private Integer stock;
     private LocalDateTime startTime;

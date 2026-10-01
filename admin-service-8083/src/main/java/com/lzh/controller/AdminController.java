@@ -56,13 +56,13 @@ public class AdminController {
         adminService.writeTokens();
     }
 
-    @Operation(summary = "插入商品")
+    @Operation(summary = "添加商品")
     @PostMapping("/add/goods")
     public void addGoods(@RequestBody GoodsDTO goodsDTO) {
         adminService.addGoods(goodsDTO);
     }
 
-    @Operation(summary = "插入秒杀商品")
+    @Operation(summary = "添加秒杀商品")
     @PostMapping("/add/kill/goods")
     public void addKillGoods(@RequestBody GoodsKillDTO goodsKillDTO) {
         adminService.addKillGoods(goodsKillDTO);
