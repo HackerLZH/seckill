@@ -172,7 +172,7 @@ public class SeckillServiceImpl implements ISeckillService {
             info.setStock(item.getStock());
             
             Integer availableStock = (Integer)redisUtil.get(SeckillConstants.SECKILL_STORE_KEY + item.getId());
-            info.setAvailableStock(availableStock);
+            info.setAvailableStock(availableStock != null ? availableStock : 0);
 
             return info;
         }).collect(Collectors.toList());
