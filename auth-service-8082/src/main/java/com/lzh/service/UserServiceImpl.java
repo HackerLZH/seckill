@@ -1,25 +1,25 @@
 package com.lzh.service;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.cloud.commons.lang.StringUtils;
+import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.cloud.nacos.annotation.NacosConfig;
 import com.feiniaojin.gracefulresponse.GracefulResponse;
+import com.lzh.entity.UserDTO;
 import com.lzh.entity.UserInfo;
 import com.lzh.entity.UserLoginVO;
-import com.lzh.entity.UserDTO;
+import com.lzh.enums.Role;
 import com.lzh.mapper.UserMapper;
-import com.lzh.utils.UserHolder;
 import com.lzh.utils.Constants;
 import com.lzh.utils.JwtUtil;
 import com.lzh.utils.RedisUtil;
+import com.lzh.utils.UserHolder;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import cn.hutool.core.bean.BeanUtil;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements IUserService{
     @Autowired
@@ -51,7 +51,9 @@ public class UserServiceImpl implements IUserService{
 
         // redis保存token
         redisUtil.set(Constants.TOKEN_KEY + token, user, tokenTimeout);
-        
+
+        log.info("{}登录: {}", username, token);
+
         return UserLoginVO.builder().userId(user.getId()).username(user.getUsername()).token(token).build();
     }
 
@@ -83,6 +85,11 @@ public class UserServiceImpl implements IUserService{
         UserInfo user = new UserInfo();
         BeanUtil.copyProperties(userdto, user);
         user.setCreateTime(LocalDateTime.now());
+        if (user.getUsername().startsWith("@admin@")) {
+            user.setRole(Role.A);
+        } else {
+            user.setRole(Role.U);
+        }
         userMapper.save(user);
     }
 

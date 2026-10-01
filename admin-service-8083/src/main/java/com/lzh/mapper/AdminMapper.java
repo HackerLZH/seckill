@@ -1,12 +1,11 @@
 package com.lzh.mapper;
 
-import java.util.List;
-
+import com.lzh.entity.UserDTO1;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
-import com.lzh.entity.UserDTO1;
+import java.util.List;
 
 @Mapper
 public interface AdminMapper {
@@ -16,7 +15,7 @@ public interface AdminMapper {
                 + " where username like \"test%\" "
                 + " order by id desc "
                 + " limit 10")
-    List<UserDTO1> findLast10Users();
+    List<UserDTO1> findLast10TestUsers();
 
     @Insert("insert into user(username,password,create_time) values(#{name},'123456',now())")
     void addUserByUsername(String name);

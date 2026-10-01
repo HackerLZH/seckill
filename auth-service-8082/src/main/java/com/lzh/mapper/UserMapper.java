@@ -9,7 +9,7 @@ public interface UserMapper {
     @Select("select * from user where username = #{username}")
     UserInfo getUserByName(String username);
 
-    @Select("insert into user (username, password, create_time) values (#{username}, #{password}, #{createTime})")
+    @Select("insert into user (username, password, create_time, role) values (#{username}, #{password}, #{createTime}, #{role})")
     void save(UserInfo user);
 
 }
