@@ -1,19 +1,15 @@
 package com.lzh.utils;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.*;
+import org.springframework.data.redis.core.script.RedisScript;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ScanOptions;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.stereotype.Component;
 
 @Component
 public class RedisUtil {
@@ -26,10 +22,11 @@ public class RedisUtil {
      * 设置String
      * @param key
      * @param value
-     * @param timeout 分钟
+     * @param timeout 时间值
+     * @param unit  单位
      */
-    public void set(String key, Object value, long timeout) {
-        redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.MINUTES);
+    public void set(String key, Object value, long timeout, TimeUnit unit) {
+        redisTemplate.opsForValue().set(key, value, timeout, unit);
     }
 
     public Object get(String key) {
@@ -73,7 +70,7 @@ public class RedisUtil {
     /**
      * 集合中添加元素
      * @param key
-     * @param values
+     * @param value
      * @return
      */
     public void sadd(String key, Object value) {
@@ -84,7 +81,7 @@ public class RedisUtil {
      * 集合中添加元素
      * @param timeout 超时（分钟）
      * @param key
-     * @param values
+     * @param value
      * @return
      */
     public void sadd(String key, Object value, Long timeout) {

@@ -5,6 +5,7 @@ import com.lzh.entity.GoodsKillDTO;
 import com.lzh.entity.UserDTO1;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -28,5 +29,6 @@ public interface AdminMapper {
 
     @Insert("insert into goods_kill(goods_id,stock,start_time,end_time,create_time,is_active) " +
             "values(#{goodsId},#{stock},#{startTime},#{endTime},now(),#{isActive})")
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id") // 主键回填
     void saveKillGoods(GoodsKillDTO goodsKillDTO);
 }
