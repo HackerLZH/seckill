@@ -15,4 +15,6 @@ elif [ "$module" == "admin" ]; then
     java -jar admin-service-8083/target/admin-service-8083-0.0.1-SNAPSHOT-exec.jar "$profile"
 elif [ "$module" == "seckill" ]; then
     java -jar seckill-service-8081/target/seckill-service-8081-0.0.1-SNAPSHOT-exec.jar "$profile"
+elif [ "$module" == "payment" ]; then
+    java -jar payment-service-8084/target/payment-service-8084-0.0.1-SNAPSHOT-exec.jar "$profile"
 fi

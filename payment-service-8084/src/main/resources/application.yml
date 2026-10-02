@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: payment-service
+
+---
+server:
+  port: ${PORT:8084}
+  servlet:
+    context-path: /payment
+spring:  
+  config:
+    activate:
+      on-profile:
+      - dev
+    import:
+#      - nacos:payment-service.yml
+      - nacos:dao.yml?group=EXT_GROUP
+  cloud:
+    nacos:
+      server-addr: ${DEV_SERVER}:8848
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+      config:
+          namespace: d53d08fa-7aab-4b26-975d-410cfc15983b
+          timeout: 5000
+          config-long-poll-timeout: 10000        
+          config-retry-time: 2000
+          max-retry: 3
+          refresh-enabled: true
+      discovery:
+          namespace: d53d08fa-7aab-4b26-975d-410cfc15983b
+---
+server:
+  port: ${PORT}
+  servlet:
+    context-path: /payment
+spring:  
+  config:
+    activate:
+      on-profile:
+      - prod
+    import:
+#      - nacos:payment-service.yml
+      - nacos:dao.yml?group=EXT_GROUP
+  cloud:
+    nacos:
+      server-addr: nacos:8848
+      username: ${NACOS_USERNAME}
+      password: ${NACOS_PASSWORD}
+      config:
+          namespace: 0a3a5563-ecb4-4d2b-af58-455a29ddaaf8
+          timeout: 5000
+          config-long-poll-timeout: 10000        
+          config-retry-time: 2000
+          max-retry: 3
+          refresh-enabled: true
+      discovery:
+          namespace: 0a3a5563-ecb4-4d2b-af58-455a29ddaaf8
