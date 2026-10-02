@@ -12,6 +12,7 @@
 		<module>gateway-8080</module>
 		<module>auth-service-8082</module>
 		<module>admin-service-8083</module>
+		<module>payment-service-8084</module>
 	</modules>
 	<name>seckill</name>
 	<description>Demo project for Spring Boot</description>
