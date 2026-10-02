@@ -1,20 +1,17 @@
 package com.lzh.entity;
 
-import com.lzh.enums.ActiveStatus;
-import lombok.Builder;
+import com.lzh.enums.OrderStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
-public class Goods {
-    private Integer id;
+public class GoodsKillOrderVO {
+    private Long orderId;
     private String name;
     private BigDecimal price;
-    private Integer stock;
     private String image;
+    private OrderStatus status;
     private LocalDateTime createTime;
-    private ActiveStatus isActive;
 }

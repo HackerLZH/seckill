@@ -1,20 +1,19 @@
 package com.lzh.controller;
 
-import org.springframework.web.bind.annotation.RestController;
-
+import com.lzh.entity.GoodsKillOrderVO;
 import com.lzh.entity.GoodsKillVO;
 import com.lzh.service.ISeckillService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 
 
 @Tag(name = "秒杀接口")
@@ -40,7 +39,13 @@ public class SeckillController {
         @PathVariable("id") Integer killId) {
         seckillService.kill(killId);
     }
-    
+
+    @Operation(summary = "我的订单")
+    @GetMapping("/kill/orders")
+    public List<GoodsKillOrderVO> getKillOrders() {
+        return seckillService.getKillOrders();
+    }
+
     @Operation(summary = "获取秒杀商品")
     @GetMapping("/products")
     public GoodsKillVO products() {

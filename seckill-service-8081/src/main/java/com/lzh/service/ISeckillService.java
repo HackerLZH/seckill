@@ -1,7 +1,10 @@
 package com.lzh.service;
 
 import com.lzh.entity.GoodsKillOrder;
+import com.lzh.entity.GoodsKillOrderVO;
 import com.lzh.entity.GoodsKillVO;
+
+import java.util.List;
 
 public interface ISeckillService {
     /**
@@ -25,4 +28,10 @@ public interface ISeckillService {
      * @return
      */
     GoodsKillVO getProducts();
+
+    /**
+     * 获取秒杀订单
+     * @return
+     */
+    List<GoodsKillOrderVO> getKillOrders();
 }
