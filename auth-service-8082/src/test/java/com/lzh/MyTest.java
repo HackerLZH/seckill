@@ -8,6 +8,8 @@ import com.lzh.entity.UserInfo;
 import com.lzh.mapper.UserMapper;
 import com.lzh.utils.RedisUtil;
 
+import java.util.concurrent.TimeUnit;
+
 @SpringBootTest
 public class MyTest {
     @Autowired
@@ -24,7 +26,7 @@ public class MyTest {
     @Test
     public void test_Redis_set() {
         UserInfo user = userMapper.getUserByName("lzh");
-        redisUtil.set("user", user, 7 * 24 * 60);
+        redisUtil.set("user", user, 7 * 24 * 60, TimeUnit.SECONDS);
     }
 
     @Test

@@ -54,7 +54,6 @@ public class AdminServiceImpl implements IAdminService {
         try {
             for (int i = beginId; i <= endId; ++i) {
                 authFeign.login("test" + i, "123456");
-                log.info("user{} login", i);
             }
         } catch (Exception e) {
             e.printStackTrace();

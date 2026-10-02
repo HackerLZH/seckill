@@ -32,22 +32,24 @@ public class UserServiceImpl implements IUserService{
     private Integer tokenTimeout;
     @Override
     public UserLoginVO login(String username, String password) {
+        // 判断是否已登录
+        if (!Objects.isNull(UserHolder.getUser())) {
+            log.error("{}已登录", username);
+            GracefulResponse.raiseException(Constants.LOGIN_DUPICATE);
+        }
+        // 用户名是否存在
+        UserInfo user = userMapper.getUserByName(username);
+        if (Objects.isNull(user)) {
+            log.error("无效用户{}", username);
+            GracefulResponse.raiseException(Constants.NO_USER);
+        }
+
+        // 密码是否正确
+        if (!password.equals(user.getPassword())) {
+            log.error("密码错误：{}", password);
+            GracefulResponse.raiseException(Constants.WRONG_PASSWORD);
+        }
         try {
-            // 判断是否已登录
-            if (!Objects.isNull(UserHolder.getUser())) {
-                GracefulResponse.raiseException(Constants.LOGIN_DUPICATE);
-            }
-            // 用户名是否存在
-            UserInfo user = userMapper.getUserByName(username);
-            if (Objects.isNull(user)) {
-                GracefulResponse.raiseException(Constants.NO_USER);
-            }
-
-            // 密码是否正确
-            if (!password.equals(user.getPassword())) {
-                GracefulResponse.raiseException(Constants.WRONG_PASSWORD);
-            }
-
             // 生成token
             String token = JwtUtil.createToken(username, password);
 
@@ -59,7 +61,7 @@ public class UserServiceImpl implements IUserService{
             return UserLoginVO.builder().userId(user.getId()).username(user.getUsername()).token(token).build();
         } catch (Exception e) {
             e.printStackTrace();
-            return UserLoginVO.builder().build();
+            return null;
         }
     }
 
@@ -75,15 +77,16 @@ public class UserServiceImpl implements IUserService{
 
     @Override
     public void register(UserDTO userdto) {
+
+        // 字段不能为空
+        // if (StringUtils.isBlank(userdto.getUsername()) || StringUtils.isBlank(userdto.getPassword()) || StringUtils.isBlank(userdto.getConfirmPassword())) {
+        //     GracefulResponse.raiseException(Constants.NOT_BLANK);
+        // }
+        // 用户名不能重复
+        if (!Objects.isNull(userMapper.getUserByName(userdto.getUsername()))) {
+            GracefulResponse.raiseException(Constants.USER_EXIST);
+        }
         try {
-            // 字段不能为空
-            // if (StringUtils.isBlank(userdto.getUsername()) || StringUtils.isBlank(userdto.getPassword()) || StringUtils.isBlank(userdto.getConfirmPassword())) {
-            //     GracefulResponse.raiseException(Constants.NOT_BLANK);
-            // }
-            // 用户名不能重复
-            if (!Objects.isNull(userMapper.getUserByName(userdto.getUsername()))) {
-                GracefulResponse.raiseException(Constants.USER_EXIST);
-            }
             // TODO: 密码校验
 
             // 密码一致
