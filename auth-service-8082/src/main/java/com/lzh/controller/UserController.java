@@ -1,28 +1,20 @@
 package com.lzh.controller;
 
-import java.util.Collections;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.feiniaojin.gracefulresponse.api.ValidationStatusCode;
-import com.lzh.entity.UserLoginVO;
 import com.lzh.entity.UserDTO;
+import com.lzh.entity.UserLoginVO;
 import com.lzh.service.IUserService;
 import com.lzh.utils.Constants;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.Map;
 
 @Slf4j
 @Tag(name = "认证接口")
@@ -42,7 +34,11 @@ public class UserController {
     public UserLoginVO login(@RequestBody UserDTO userdto) {
         return userService.login(userdto.getUsername(), userdto.getPassword());
     }
-    
+
+    @PostMapping("/login2")
+    public void login(@RequestParam("username") String username, @RequestParam("password") String password) {
+        userService.login(username, password);
+    }
 
     @Operation(summary = "用户注册")
     @PostMapping("/register") // 小心swagger的RequestBody，不要导错了！
