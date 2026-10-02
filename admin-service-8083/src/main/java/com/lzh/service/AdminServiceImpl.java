@@ -17,6 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -39,26 +40,40 @@ public class AdminServiceImpl implements IAdminService {
     @Transactional
 	@Override
 	public void addUsers(Integer beginId, Integer endId) {
-        for (int i = beginId; i <= endId; ++i) {
-            adminMapper.addUserByUsername("test" + i);
-            log.info("user{} saves", i);
+        try {
+            for (int i = beginId; i <= endId; ++i) {
+                adminMapper.addUserByUsername("test" + i);
+                log.info("user{} saves", i);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-	}
+    }
     @Override
     public void loginUsers(Integer beginId, Integer endId) {
-        for (int i = beginId; i <= endId; ++i) {
-            authFeign.login("test" + i, "123456");
-            log.info("user{} login", i);
+        try {
+            for (int i = beginId; i <= endId; ++i) {
+                authFeign.login("test" + i, "123456");
+                log.info("user{} login", i);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
     @Override
     public Map<String, Object> getLoginUsers() {
-        log.info("获取已登录用户");
-        return redisUtil.search("USER:TOKEN:*");
+        try {
+            log.info("获取已登录用户");
+            return redisUtil.search("USER:TOKEN:*");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new HashMap<>();
+        }
     }
 
     @NacosConfig(group = "DEFAULT_GROUP", dataId = "admin-service.yml", key = "tokens.output")
     private String tokensOutput;
+
     @Override
     public void writeTokens() {
         log.info("写入文件：所有登录token");

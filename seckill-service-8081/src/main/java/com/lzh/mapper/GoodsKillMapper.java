@@ -33,7 +33,7 @@ public interface GoodsKillMapper {
      * 查询当前秒杀商品
      * @return
      */
-    @Select("select g1.id, g1.name, g1.price, g1.image, g2.stock "
+    @Select("select g2.id, g1.name, g1.price, g1.image, g2.stock "
             + "from goods g1 "
             + "inner join goods_kill g2 "
             + "on g1.id = g2.goods_id "

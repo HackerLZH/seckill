@@ -1,5 +1,6 @@
 package com.lzh.mapper;
 
+import com.lzh.entity.GoodsKillOrderVO;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -8,6 +9,8 @@ import org.apache.ibatis.annotations.Update;
 
 import com.lzh.entity.GoodsKillOrder;
 import com.lzh.enums.OrderStatus;
+
+import java.util.List;
 
 @Mapper
 public interface GoodsKillOrderMapper {
@@ -20,4 +23,12 @@ public interface GoodsKillOrderMapper {
 
     @Update("update goods_kill_order set status = #{status} where order_id = #{orderId}")
     void updateStatus(@Param("orderId") Long orderId, @Param("status") OrderStatus status);
+
+    @Select("select order_id, name, price, image, status, gko.create_time " +
+            "from goods_kill_order gko " +
+            "inner join goods_kill gk on gko.kill_id = gk.id " +
+            "inner join goods g on g.id = gk.goods_id " +
+            "where user_id = #{user_id} " +
+            "order by gko.create_time desc")
+    List<GoodsKillOrderVO> findOrdersByUserId(@Param("user_id") Integer id);
 }
