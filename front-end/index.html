@@ -271,7 +271,7 @@
         function createProductCardHTML(product, containerId) {
             if (containerId === 'current-seckill-products') {
                 // 当前秒杀商品卡片
-                const soldPercent = Math.round((product.stock - product.availableStock) / product.stock * 100);
+                const soldPercent = ((product.stock - product.availableStock) * 100 / product.stock).toFixed(1);
                 return `
                     <div class="card product-card">
                         <img src="${product.image}" class="card-img-top" alt="${product.name}">
