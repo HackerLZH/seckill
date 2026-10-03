@@ -3,6 +3,7 @@ package com.lzh.service;
 import com.lzh.entity.GoodsKillOrder;
 import com.lzh.entity.GoodsKillOrderVO;
 import com.lzh.entity.GoodsKillVO;
+import com.lzh.enums.OrderStatus;
 
 import java.util.List;
 
@@ -19,10 +20,11 @@ public interface ISeckillService {
      */
     void saveOrder(GoodsKillOrder order);
     /**
-     * 处理超时订单
+     * 处理订单状态
      * @param order
+     * @param status
      */
-    void processTimeOutOrder(GoodsKillOrder order);
+    void updateOrderStatus(GoodsKillOrder order, OrderStatus status);
     /**
      * 获取秒杀商品
      * @return
@@ -34,4 +36,6 @@ public interface ISeckillService {
      * @return
      */
     List<GoodsKillOrderVO> getKillOrders();
+
+    boolean checkOrder(Long orderId, Integer userId, OrderStatus orderStatus);
 }

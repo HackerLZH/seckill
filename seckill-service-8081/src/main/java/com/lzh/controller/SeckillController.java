@@ -1,17 +1,16 @@
 package com.lzh.controller;
 
+import com.lzh.entity.GoodsKillOrder;
 import com.lzh.entity.GoodsKillOrderVO;
 import com.lzh.entity.GoodsKillVO;
+import com.lzh.enums.OrderStatus;
 import com.lzh.service.ISeckillService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -50,5 +49,17 @@ public class SeckillController {
     @GetMapping("/products")
     public GoodsKillVO products() {
         return seckillService.getProducts();
+    }
+
+    @Operation(summary = "订单号有效性检验")
+    @GetMapping("/check/order")
+    public boolean checkOrder(Long orderId, Integer userId) {
+        return seckillService.checkOrder(orderId, userId, OrderStatus.WAIT);
+    }
+
+    @Operation(summary = "支付成功，订单状态更新为PAID")
+    @PostMapping("/update/order/paid")
+    public void updateOrderStatusAfterPaid(@RequestParam("orderId") Long orderId) {
+        seckillService.updateOrderStatus(GoodsKillOrder.builder().orderId(orderId).build(), OrderStatus.PAID);
     }
 }
