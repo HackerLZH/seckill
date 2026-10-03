@@ -1,7 +1,10 @@
 package com.lzh.service;
 
-import java.io.IOException;
-
+import com.lzh.entity.GoodsKillOrder;
+import com.lzh.enums.OrderStatus;
+import com.lzh.utils.SeckillConstants;
+import com.rabbitmq.client.Channel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.AmqpHeaders;
@@ -9,11 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
-import com.lzh.entity.GoodsKillOrder;
-import com.lzh.utils.SeckillConstants;
-import com.rabbitmq.client.Channel;
-
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
 
 @Slf4j
 @Component
@@ -54,7 +53,7 @@ public class RabbitConsumer {
     @RabbitListener(queues = SeckillConstants.MQ_KILL_GOOD_DLX_QUEUE)
     public void consumeKillGoodDLX(GoodsKillOrder order, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) {
         try {
-            seckikkillService.processTimeOutOrder(order);
+            seckikkillService.updateOrderStatus(order, OrderStatus.CANCEL);
             if (!tryAck(channel, tag)) {
                 return;
             }

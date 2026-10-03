@@ -31,4 +31,7 @@ public interface GoodsKillOrderMapper {
             "where user_id = #{user_id} " +
             "order by gko.create_time desc")
     List<GoodsKillOrderVO> findOrdersByUserId(@Param("user_id") Integer id);
+
+    @Select("select * from goods_kill_order where order_id = #{orderId}")
+    GoodsKillOrder findKillOrderByOrderId(@Param("orderId") Long orderId);
 }

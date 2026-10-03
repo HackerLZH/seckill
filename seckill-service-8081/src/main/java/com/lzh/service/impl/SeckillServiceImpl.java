@@ -25,6 +25,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -155,19 +156,19 @@ public class SeckillServiceImpl implements ISeckillService {
             e.printStackTrace();
         }
     }
-    // @Transactional
+
     @Override
-    public void processTimeOutOrder(GoodsKillOrder order) {
+    public void updateOrderStatus(GoodsKillOrder order, OrderStatus status) {
         try {
             // 查询订单状态
-            OrderStatus status = goodsKillOrderMapper.selectStatus(order.getOrderId());
-            // 如果为WAIT（待付款），则更改为CANCEL（已取消）
-            Optional.ofNullable(status).filter(s -> s == OrderStatus.WAIT).ifPresent(s -> {
-                goodsKillOrderMapper.updateStatus(order.getOrderId(), OrderStatus.CANCEL);
-                // goodsKillMapper.addStock(order.getGoodsKillId(), 1);
+            OrderStatus cur = goodsKillOrderMapper.selectStatus(order.getOrderId());
+            // 如果为WAIT（待付款），则更改为指定状态
+            Optional.ofNullable(cur).filter(s -> s == OrderStatus.WAIT).ifPresent(s -> {
+                goodsKillOrderMapper.updateStatus(order.getOrderId(), status);
             });
+            log.info("订单{}，状态更新为{}", order.getOrderId(), status.getValue());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("订单{}, 状态更新失败", order.getOrderId(), e);
         }
     }
 
@@ -206,6 +207,19 @@ public class SeckillServiceImpl implements ISeckillService {
         } catch (Exception e) {
             e.printStackTrace();
             return List.of();
+        }
+    }
+
+    @Override
+    public boolean checkOrder(Long orderId, Integer userId, OrderStatus orderStatus) {
+        try {
+            GoodsKillOrder goodsKillOrder = goodsKillOrderMapper.findKillOrderByOrderId(orderId);
+            return !Objects.isNull(goodsKillOrder)
+                    && userId.equals(goodsKillOrder.getUserId())
+                    && orderStatus == goodsKillOrder.getStatus();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

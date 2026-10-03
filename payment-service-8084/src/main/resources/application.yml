@@ -7,14 +7,16 @@ server:
   port: ${PORT:8084}
   servlet:
     context-path: /payment
-spring:  
+spring:
   config:
     activate:
       on-profile:
       - dev
     import:
-#      - nacos:payment-service.yml
-      - nacos:dao.yml?group=EXT_GROUP
+      - nacos:payment-service.yml
+#      - nacos:dao.yml?group=EXT_GROUP
+      - nacos:redis-config.yml?group=EXT_GROUP
+#      - nacos:common.yml?group=EXT_GROUP
   cloud:
     nacos:
       server-addr: ${DEV_SERVER}:8848
@@ -23,7 +25,7 @@ spring:
       config:
           namespace: d53d08fa-7aab-4b26-975d-410cfc15983b
           timeout: 5000
-          config-long-poll-timeout: 10000        
+          config-long-poll-timeout: 10000
           config-retry-time: 2000
           max-retry: 3
           refresh-enabled: true
@@ -34,14 +36,16 @@ server:
   port: ${PORT}
   servlet:
     context-path: /payment
-spring:  
+spring:
   config:
     activate:
       on-profile:
       - prod
     import:
-#      - nacos:payment-service.yml
-      - nacos:dao.yml?group=EXT_GROUP
+      - nacos:payment-service.yml
+#      - nacos:dao.yml?group=EXT_GROUP
+      - nacos:redis-config.yml?group=EXT_GROUP
+#      - nacos:common.yml?group=EXT_GROUP
   cloud:
     nacos:
       server-addr: nacos:8848
@@ -50,7 +54,7 @@ spring:
       config:
           namespace: 0a3a5563-ecb4-4d2b-af58-455a29ddaaf8
           timeout: 5000
-          config-long-poll-timeout: 10000        
+          config-long-poll-timeout: 10000
           config-retry-time: 2000
           max-retry: 3
           refresh-enabled: true
