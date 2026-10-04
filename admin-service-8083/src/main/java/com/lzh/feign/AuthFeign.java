@@ -6,6 +6,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "auth-service", path = "auth")
 public interface AuthFeign {
-    @PostMapping("/login2")
+    @PostMapping("/internal/login")
     void login(@RequestParam("username") String username, @RequestParam("password") String password);
 }

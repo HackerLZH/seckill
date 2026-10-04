@@ -35,7 +35,8 @@ public class UserController {
         return userService.login(userdto.getUsername(), userdto.getPassword());
     }
 
-    @PostMapping("/login2")
+    @Operation(summary = "用户登录（内部调用）")
+    @PostMapping("/internal/login")
     public void login(@RequestParam("username") String username, @RequestParam("password") String password) {
         userService.login(username, password);
     }

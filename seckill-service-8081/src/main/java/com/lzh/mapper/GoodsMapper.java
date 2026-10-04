@@ -14,5 +14,5 @@ public interface GoodsMapper {
      */
     @Update("update goods set stock = stock - #{num} " 
                 + "where id = #{id} and stock >= #{num}")
-    void cutStock(@Param("id") int id, @Param("num") int num);
+    int cutStock(@Param("id") int id, @Param("num") int num);
 }

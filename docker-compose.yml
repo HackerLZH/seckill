@@ -4,7 +4,7 @@ services:
       context: ./gateway-8080
       dockerfile: Dockerfile-prod
     image: lzh/gateway:latest
-    container_name: gateway
+    container_name: seckill-gateway
     restart: no
     mem_limit: ${SERVICE_MEM_LIMIT:-512m}
     environment:
@@ -24,7 +24,7 @@ services:
       context: ./auth-service-8082
       dockerfile: Dockerfile-prod
     image: lzh/auth:latest
-    container_name: auth
+    container_name: seckill-auth
     restart: no
     mem_limit: ${SERVICE_MEM_LIMIT:-512m}
     environment:
@@ -41,7 +41,7 @@ services:
       context: ./seckill-service-8081
       dockerfile: Dockerfile-prod
     image: lzh/seckill:latest
-    container_name: seckill
+    container_name: seckill-seckill
     restart: no
     mem_limit: ${SERVICE_MEM_LIMIT:-512m}
     environment:
@@ -58,7 +58,7 @@ services:
       context: ./admin-service-8083
       dockerfile: Dockerfile-prod
     image: lzh/admin:latest
-    container_name: admin
+    container_name: seckill-admin
     restart: no
     mem_limit: ${SERVICE_MEM_LIMIT:-512m}
     environment:
@@ -70,9 +70,26 @@ services:
       - "${ADMIN_SERVICE_PORT:-8083}:8083"
     networks:
       - seckill
+  payment:
+    build:
+      context: ./payment-service-8084
+      dockerfile: Dockerfile-prod
+    image: lzh/payment:latest
+    container_name: seckill-payment
+    restart: no
+    mem_limit: ${SERVICE_MEM_LIMIT:-512m}
+    environment:
+      - TZ=Asia/Shanghai
+      - PORT=${SECKILL_SERVICE_PORT:-8084}
+      - NACOS_USERNAME=${NACOS_USERNAME:-nacos}
+      - NACOS_PASSWORD=${NACOS_PASSWORD:-nacos}
+    ports:
+      - "${SECKILL_SERVICE_PORT:-8084}:8084"
+    networks:
+      - seckill
   redis:
     image: redis
-    container_name: redis
+    container_name: seckill-redis
     restart: no
     mem_limit: ${SERVICE_MEM_LIMIT:-512m}
     environment:
@@ -88,7 +105,7 @@ services:
     command: redis-server /etc/redis/redis.conf
   mysql:
     image: mysql:8.0
-    container_name: mysql
+    container_name: seckill-mysql
     restart: no
     mem_limit: ${SERVICE_MEM_LIMIT:-512m}
     environment:
@@ -114,7 +131,7 @@ services:
       start_period: 10s
   rabbitmq:
     image: rabbitmq:management
-    container_name: rabbitmq
+    container_name: seckill-rabbitmq
     restart: no
     mem_limit: ${SERVICE_MEM_LIMIT:-512m}
     hostname: rabbitserver
@@ -132,7 +149,7 @@ services:
       - seckill
   nginx:
     image: nginx:1.18.0
-    container_name: nginx
+    container_name: seckill-nginx
     restart: no
     environment:
       - TZ=Asia/Shanghai
@@ -152,7 +169,7 @@ services:
         condition: service_healthy
   nacos:
     image: nacos/nacos-server:v3.1.1
-    container_name: nacos
+    container_name: seckill-nacos
     restart: no
     mem_limit: ${NACOS_MEM_LIMIT:-1g}
     ports:

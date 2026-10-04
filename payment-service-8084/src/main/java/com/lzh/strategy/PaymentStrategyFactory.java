@@ -2,11 +2,12 @@ package com.lzh.strategy;
 
 import com.lzh.entity.PaymentRequest;
 import com.lzh.entity.PaymentResponse;
+import com.lzh.feign.SeckillFeign;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +24,9 @@ public class PaymentStrategyFactory {
 
     @Autowired
     private AlipayPaymentStrategy alipayPaymentStrategy;
+
+    @Autowired
+    private SeckillFeign seckillFeign;
 
     private final Map<String, PaymentStrategy> strategyMap = new HashMap<>();
 
@@ -70,8 +74,17 @@ public class PaymentStrategyFactory {
      * 统一回调处理入口
      */
     public boolean handleCallback(String payType, Map<String, String> params) {
-        PaymentStrategy strategy = getStrategy(payType);
-        return strategy.handleCallback(params);
+        try {
+            PaymentStrategy strategy = getStrategy(payType);
+            if (strategy.handleCallback(params)) {
+                // 支付成功后处理
+                seckillFeign.postprocess(Long.parseLong(params.get("out_trade_no")));
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
