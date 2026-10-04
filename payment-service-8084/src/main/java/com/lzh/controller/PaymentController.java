@@ -5,7 +5,6 @@ import com.lzh.entity.PaymentResponse;
 import com.lzh.service.IPaymentService;
 import com.lzh.utils.UserHolder;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,10 +56,8 @@ public class PaymentController {
     @Operation(summary = "查询支付状态", description = "根据订单ID查询支付状态")
     @GetMapping("/status/{orderId}")
     public PaymentResponse queryStatus(
-            @Parameter(description = "支付方式：WECHAT/ALIPAY", required = true)
-            @RequestParam String payType,
-            @Parameter(description = "订单ID", required = true)
-            @PathVariable Long orderId) {
+            @RequestParam("支付方式 WECHAT/ALIPAY") String payType,
+            @PathVariable("orderId") Long orderId) {
 
         return paymentService.queryStatus(payType, orderId);
     }

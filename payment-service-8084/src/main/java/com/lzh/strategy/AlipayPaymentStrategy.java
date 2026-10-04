@@ -15,16 +15,11 @@ import com.alipay.api.response.AlipayTradePrecreateResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.binarywang.utils.qrcode.MatrixToImageWriter;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.common.BitMatrix;
 import com.lzh.entity.PaymentRequest;
 import com.lzh.entity.PaymentResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -102,12 +97,11 @@ public class AlipayPaymentStrategy implements PaymentStrategy {
                 log.info("支付宝预下单成功，订单号: {}, 二维码链接: {}",
                     response.getOutTradeNo(), response.getQrCode());
 
-                BitMatrix matrix = new MultiFormatWriter().encode(response.getQrCode(), BarcodeFormat.QR_CODE, 300, 300);
-
-                // TODO 保存二维码图片（测试）
-                File file = new File("/tmp/qr-code.png");
-                MatrixToImageWriter.writeToFile(matrix, "PNG", file);
-                log.info("二维码已生成并保存到: {}", file.getAbsolutePath());
+                // 保存二维码图片（测试）
+//                BitMatrix matrix = new MultiFormatWriter().encode(response.getQrCode(), BarcodeFormat.QR_CODE, 300, 300);
+//                File file = new File("/tmp/qr-code.png");
+//                MatrixToImageWriter.writeToFile(matrix, "PNG", file);
+//                log.info("二维码已生成并保存到: {}", file.getAbsolutePath());
 
                 return PaymentResponse.success(
                     getPayType(),
@@ -181,6 +175,22 @@ public class AlipayPaymentStrategy implements PaymentStrategy {
         log.info("查询支付宝支付状态，订单号: {}", orderId);
 
         try {
+            if (alipayClient == null) {
+                synchronized (this) {
+                    if (alipayClient == null) {
+                        alipayClient = new DefaultAlipayClient(
+                                gatewayUrl,
+                                appId,
+                                privateKey,
+                                "json",
+                                "UTF-8",
+                                publicKey,
+                                "RSA2"
+                        );
+                        log.info("支付宝沙箱环境初始化完成，APP_ID: {}", appId);
+                    }
+                }
+            }
             AlipayTradeQueryRequest queryRequest = new AlipayTradeQueryRequest();
             AlipayTradeQueryModel model = new AlipayTradeQueryModel();
             model.setOutTradeNo(String.valueOf(orderId));
@@ -216,6 +226,22 @@ public class AlipayPaymentStrategy implements PaymentStrategy {
         log.info("申请支付宝退款，订单号: {}, 金额: {}分, 原因: {}", orderId, amount, reason);
 
         try {
+            if (alipayClient == null) {
+                synchronized (this) {
+                    if (alipayClient == null) {
+                        alipayClient = new DefaultAlipayClient(
+                                gatewayUrl,
+                                appId,
+                                privateKey,
+                                "json",
+                                "UTF-8",
+                                publicKey,
+                                "RSA2"
+                        );
+                        log.info("支付宝沙箱环境初始化完成，APP_ID: {}", appId);
+                    }
+                }
+            }
             AlipayTradeRefundRequest refundRequest = new AlipayTradeRefundRequest();
             AlipayTradeRefundModel model = new AlipayTradeRefundModel();
             model.setOutTradeNo(String.valueOf(orderId));

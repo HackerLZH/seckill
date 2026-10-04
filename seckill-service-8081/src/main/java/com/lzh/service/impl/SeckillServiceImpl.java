@@ -64,25 +64,24 @@ public class SeckillServiceImpl implements ISeckillService {
     }
 
     @Override
-    public void kill(Integer killId) {
+    public String kill(Integer killId) {
+        Integer userId = UserHolder.getUser().getId();
+        // 使用lua脚本实现 扣减库存+一人一单， 保证原子性
+        long res = (long) redisUtil.execute(
+                SECK_SCRIPT
+                , List.of(SeckillConstants.SECKILL_STORE_KEY, SeckillConstants.SECKILL_ORDER_KEY) // 传入keys
+                , String.valueOf(userId) // arg1
+                , String.valueOf(killId) // arg2
+                , orderTimeout.toString() // arg3
+        );
+
+        if (res == 1) {
+            GracefulResponse.raiseException(SeckillConstants.STOCK_INSUFFICIENT);
+        }
+        if (res == 2) {
+            GracefulResponse.raiseException(SeckillConstants.ORDER_EXIST);
+        }
         try {
-            Integer userId = UserHolder.getUser().getId();
-            // 使用lua脚本实现 扣减库存+一人一单， 保证原子性
-            long res = (long) redisUtil.execute(
-                    SECK_SCRIPT
-                    , List.of(SeckillConstants.SECKILL_STORE_KEY, SeckillConstants.SECKILL_ORDER_KEY) // 传入keys
-                    , String.valueOf(userId) // arg1
-                    , String.valueOf(killId) // arg2
-                    , orderTimeout.toString() // arg3
-            );
-
-            if (res == 1) {
-                GracefulResponse.raiseException(SeckillConstants.STOCK_INSUFFICIENT);
-            }
-            if (res == 2) {
-                GracefulResponse.raiseException(SeckillConstants.ORDER_EXIST);
-            }
-
             long orderId = 0L;
             while (orderId == 0L) {
                 try {
@@ -114,8 +113,11 @@ public class SeckillServiceImpl implements ISeckillService {
                     , SeckillConstants.MQ_KILL_GOOD_ROUTE
                     , message
             );
+
+            return String.valueOf(orderId);
         } catch (Exception e) {
             e.printStackTrace();
+            return "";
         }
     }
 
@@ -168,11 +170,15 @@ public class SeckillServiceImpl implements ISeckillService {
             // 从redis获取availableStock，写入currentList
             List<GoodsKillVO.GoodsKillInfo> current = currentList.stream().map(item -> {
                 GoodsKillVO.GoodsKillInfo info = new GoodsKillVO.GoodsKillInfo();
+                info.setId(item.getId());
                 info.setName(item.getName());
                 info.setImage(item.getImage());
                 info.setPrice(item.getPrice());
                 info.setStartTime(item.getStartTime());
-                info.setStock(item.getStock());
+//                info.setStock(item.getStock());
+
+                Integer originStock = (Integer) redisUtil.get(SeckillConstants.SECKILL_ORIGIN_STORE_KEY + item.getId());
+                info.setOriginStock(originStock);
 
                 Integer availableStock = (Integer) redisUtil.get(SeckillConstants.SECKILL_STORE_KEY + item.getId());
                 info.setAvailableStock(availableStock != null ? availableStock : 0);

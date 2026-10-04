@@ -1,0 +1,74 @@
+.seckill-banner {
+    background: linear-gradient(135deg, #ff4e50, #f9d423);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+.countdown {
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: rgba(0,0,0,0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+}
+.product-card {
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+.original-price {
+    text-decoration: line-through;
+    color: #6c757d;
+}
+.seckill-price {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+.progress-thin {
+    height: 5px;
+}
+.seckill-btn {
+    background: linear-gradient(135deg, #ff4e50, #f9d423);
+    border: none;
+    font-weight: bold;
+}
+.seckill-btn:hover {
+    opacity: 0.9;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+.hot-item {
+    animation: pulse 2s infinite;
+}
+/* 底部样式 */
+.footer {
+    background-color: #f8f9fa;
+    padding: 2rem 0;
+    margin-top: 2rem;
+    border-top: 1px solid #dee2e6;
+}
+.footer-links a {
+    text-decoration: none;
+    color: #6c757d;
+    margin-right: 1rem;
+}
+.footer-links a:hover {
+    color: #000;
+}
+.beian-link {
+    color: #6c757d;
+    text-decoration: none;
+}
+.beian-link:hover {
+    color: #000;
+    text-decoration: underline;
+}

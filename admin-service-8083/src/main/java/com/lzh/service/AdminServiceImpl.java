@@ -97,7 +97,8 @@ public class AdminServiceImpl implements IAdminService {
         }
     }
 
-    private static final String SECKILL_STORE_KEY = "seckill:stock:";
+    private static final String SECKILL_STOCK_KEY = "seckill:stock:";
+    private static final String SECKILL_ORIGIN_STOCK_KEY = "seckill:origin:stock:";
     // 秒杀用户
     private static final String SECKILL_ORDER_KEY = "seckill:order:";
 
@@ -107,7 +108,13 @@ public class AdminServiceImpl implements IAdminService {
             adminMapper.saveKillGoods(goodsKillDTO);
             if (goodsKillDTO.getStartTime().isBefore(LocalDateTime.now()) && goodsKillDTO.getEndTime().isAfter(LocalDateTime.now())) {
                 // 秒杀已经开始，写redis
-                redisUtil.set(SECKILL_STORE_KEY + goodsKillDTO.getId()
+                redisUtil.set(SECKILL_STOCK_KEY + goodsKillDTO.getId()
+                        , goodsKillDTO.getStock()
+                        // 剩余秒数作为ttl
+                        , Duration.between(LocalDateTime.now(), goodsKillDTO.getEndTime()).getSeconds()
+                        , TimeUnit.SECONDS
+                );
+                redisUtil.set(SECKILL_ORIGIN_STOCK_KEY + goodsKillDTO.getId()
                         , goodsKillDTO.getStock()
                         // 剩余秒数作为ttl
                         , Duration.between(LocalDateTime.now(), goodsKillDTO.getEndTime()).getSeconds()
