@@ -11,9 +11,9 @@ public interface ISeckillService {
     /**
      * 秒杀
      * @param killId
-     * @return
+     * @return 订单id (JS精度不如Java，因此String类型返回)
      */
-    void kill(Integer killId);
+    String kill(Integer killId);
     /**
      * 下订单
      * @param order

@@ -8,82 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .seckill-banner {
-            background: linear-gradient(135deg, #ff4e50, #f9d423);
-            color: white;
-            padding: 2rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-        .countdown {
-            font-size: 1.5rem;
-            font-weight: bold;
-            background: rgba(0,0,0,0.2);
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-        }
-        .product-card {
-            transition: all 0.3s ease;
-            margin-bottom: 1.5rem;
-        }
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        .original-price {
-            text-decoration: line-through;
-            color: #6c757d;
-        }
-        .seckill-price {
-            color: #dc3545;
-            font-weight: bold;
-            font-size: 1.2rem;
-        }
-        .progress-thin {
-            height: 5px;
-        }
-        .seckill-btn {
-            background: linear-gradient(135deg, #ff4e50, #f9d423);
-            border: none;
-            font-weight: bold;
-        }
-        .seckill-btn:hover {
-            opacity: 0.9;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        .hot-item {
-            animation: pulse 2s infinite;
-        }
-        /* 底部样式 */
-        .footer {
-            background-color: #f8f9fa;
-            padding: 2rem 0;
-            margin-top: 2rem;
-            border-top: 1px solid #dee2e6;
-        }
-        .footer-links a {
-            text-decoration: none;
-            color: #6c757d;
-            margin-right: 1rem;
-        }
-        .footer-links a:hover {
-            color: #000;
-        }
-        .beian-link {
-            color: #6c757d;
-            text-decoration: none;
-        }
-        .beian-link:hover {
-            color: #000;
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="css/index.css">
 </head>
 <body>
     <!-- 修改导航栏 -->
@@ -100,9 +25,6 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="#">首页</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="submit-product">提交商品</a>
-                    </li>
                 </ul>
                 <div class="d-flex">
                     <a href="#" class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#loginModal" id="loginBtn">
@@ -115,6 +37,7 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle"></i> 用户信息</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fas fa-shopping-cart"></i> 购物车</a></li>
+                            <li id="seckillManageItem" style="display: none;"><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> 秒杀管理</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
                         </ul>
@@ -226,200 +149,7 @@
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-    <script>
-        let RQ_PREF = "";
-        if (window.location.hostname === "localhost") {
-            RQ_PREF = "http://localhost:8080"
-        } else {
-            RQ_PREF = "/api";
-        }
-
-        // 页面加载时获取商品数据
-        $(document).ready(function() {
-            fetchSeckillProducts();
-        });
-
-        // 获取秒杀商品数据
-        function fetchSeckillProducts() {
-            // 这里应该替换为实际的API端点
-            $.ajax({
-                url: `${RQ_PREF}/seckill/products`,
-                method: 'GET',
-                dataType: 'json',
-                success: function(response) {
-                    renderProducts(response.data.current, 'current-seckill-products');
-                    renderProducts(response.data.upcoming, 'upcoming-seckill-products');
-                },
-                error: function(xhr, status, error) {
-                    console.error('获取商品数据失败:', error);
-                }
-            });
-        }
-
-        // 渲染商品列表
-        function renderProducts(products, containerId) {
-            const container = $('#' + containerId);
-            container.empty();
-            products.forEach(product => {
-                const productCard = $('<div>').addClass('col-md-4');
-                productCard.html(createProductCardHTML(product, containerId));
-                container.append(productCard);
-            });
-        }
-
-        // 创建商品卡片HTML
-        function createProductCardHTML(product, containerId) {
-            if (containerId === 'current-seckill-products') {
-                // 当前秒杀商品卡片
-                const soldPercent = ((product.stock - product.availableStock) * 100 / product.stock).toFixed(1);
-                return `
-                    <div class="card product-card">
-                        <img src="${product.image}" class="card-img-top" alt="${product.name}">
-                        <div class="card-body">
-                            <h5 class="card-title">${product.name}</h5>
-                            <p class="card-text">
-                                <span class="original-price">¥${product.price - 2000}</span>
-                                <span class="seckill-price ms-2">¥${product.price}</span>
-                            </p>
-                            <div class="progress progress-thin mb-2">
-                                <div class="progress-bar bg-danger" style="width: ${soldPercent}%"></div>
-                            </div>
-                            <small class="text-muted">已售${soldPercent}%，仅剩${product.availableStock}件</small>
-                            <button class="${product.availableStock === 0? 'btn btn-outline-secondary w-100' : 'btn seckill-btn w-100 mt-2'}"
-                                onclick="checkLogin()"
-                                ${product.availableStock === 0? 'disabled' : ''}>
-                            立即秒杀
-                            </button>
-                        </div>
-                    </div>
-                `;
-            } else {
-                // 即将开始的秒杀商品卡片
-                return `
-                    <div class="card product-card">
-                        <div class="card-header bg-light">
-                            ${new Date(product.startTime).toLocaleString()} 开始
-                        </div>
-                        <img src="${product.image}" class="card-img-top" alt="${product.name}">
-                        <div class="card-body">
-                            <h5 class="card-title">${product.name}</h5>
-                            <p class="card-text">
-                                <span class="original-price">¥${product.price - 2000}</span>
-                                <span class="seckill-price ms-2">¥${product.price}</span>
-                            </p>
-                            <button class="btn btn-outline-secondary w-100" disabled>即将开始</button>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        var token_key = 'SeckillAuthorization';
-
-        function checkLogin() {
-            // 检查是否存在SeckillAuthorization令牌
-            const token = localStorage.getItem(token_key);
-            if(!token) { // 如果没有令牌，则显示登录模态框
-                $('#loginModal').modal('show');
-                return false;
-            }
-            // 执行秒杀逻辑
-        }
-
-        $('#loginForm').submit(function(e) {
-            e.preventDefault();
-
-            const username = $("#login-username").val();
-            const password = $("#login-password").val();
-
-            $.ajax({
-                url: `${RQ_PREF}/auth/login`,
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    username: username,
-                    password: password
-                }),
-                success: function(response) {
-                    alert('登录成功');
-                    $('#loginModal').modal('hide');
-                    $('#loginForm')[0].reset();
-                    // 隐藏登录按钮，显示用户菜单
-                    $('#loginBtn').hide();
-                    $('#usernameDisplay').text(response.data.username);
-                    $('#userMenu').show();
-                    // 保存令牌到localStorage
-                    localStorage.setItem('token', response.data.token);
-                },
-                error: function(xhr, status, error) {
-                    alert('登录失败: ' + (xhr.responseJSON ? xhr.responseJSON.message : '未知错误'));
-                }
-            });
-
-        });
-        
-        $('#registerForm').submit(function(e) {
-            e.preventDefault();
-
-            const username = $("#register-username").val();
-            const password = $("#register-password").val();
-            const confirmPassword = $("#register-confirm-password").val();
-            
-            // 简单验证密码
-            if (password !== confirmPassword) {
-                alert('两次输入的密码不一致');
-                return;
-            }
-
-            if (password.length < 6) {
-                alert('密码长度至少6个字符');
-                return;
-            }
-            
-            // 发送注册请求
-            $.ajax({
-                url: `${RQ_PREF}/auth/register`,
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    username: username,
-                    password: password
-                }),
-                success: function(response) {
-                    alert('注册成功');
-                    // 关闭注册模态框
-                    $('#registerModal').modal('hide');
-                    // 清空表单
-                    $('#registerForm')[0].reset();
-                },
-                error: function(xhr, status, error) {
-                    alert('注册失败: ' + (xhr.responseJSON ? xhr.responseJSON.message : '未知错误'));
-                }
-            });
-        });
-
-        // 登出功能
-        $('#logoutBtn').click(function(e) {
-            e.preventDefault();
-            $.ajax({
-                url: `${RQ_PREF}/auth/logout`,
-                method: 'POST',
-                headers: {
-                    [token_key]: localStorage.getItem('token')
-                },
-                success: function(response) {
-                    // 清除本地存储的令牌
-                    localStorage.removeItem('token');
-                    // 隐藏用户菜单，显示登录按钮
-                    $('#userMenu').hide();
-                    $('#loginBtn').show();
-                    alert('已退出登录');
-                },
-                error: function(xhr, status, error) {
-                    alert('登出失败:' + (xhr.responseJSON ? xhr.responseJSON.message : '未知错误'));
-                }
-            })
-        });
-    </script>
+    <script src="https://cdn.staticfile.net/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="js/index.js"></script>
 </body>
 </html>

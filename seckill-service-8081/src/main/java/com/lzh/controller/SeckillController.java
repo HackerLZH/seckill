@@ -32,10 +32,10 @@ public class SeckillController {
      */
     @Operation(summary = "秒杀")
     @PostMapping("/kill/{id}")
-    public void kill(
+    public String kill(
         @Parameter(name = "id", description = "秒杀id", required = true, in = ParameterIn.PATH)
         @PathVariable("id") Integer killId) {
-        seckillService.kill(killId);
+        return seckillService.kill(killId);
     }
 
     @Operation(summary = "我的订单")
@@ -57,7 +57,7 @@ public class SeckillController {
     }
 
     @Operation(summary = "支付成功，后处理（内部路径）")
-    @PostMapping("/postprocess")
+    @PostMapping("/internal/postprocess")
     public void postprocess(@RequestParam("orderId") Long orderId) {
         seckillService.postProcess(orderId);
     }

@@ -18,12 +18,13 @@ public class GoodsKillVO {
 
     @Data
     public static class GoodsKillInfo { 
-        private Integer id;
+        private Integer id; // 秒杀id
         private String name;
         private String image;
         private BigDecimal price;
         private LocalDateTime startTime;
         private Integer stock; //秒杀库存
+        private Integer originStock; // 原始秒杀库存
         private Integer availableStock; // redis获取
     } 
 }

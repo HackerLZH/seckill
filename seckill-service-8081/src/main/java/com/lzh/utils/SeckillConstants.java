@@ -7,8 +7,10 @@ public final class SeckillConstants {
     // Redis Key
     // 秒杀库存
     public static final String SECKILL_STORE_KEY = "seckill:stock:";
+    public static final String SECKILL_ORIGIN_STORE_KEY = "seckill:origin:stock:";
     // 秒杀用户
     public static final String SECKILL_ORDER_KEY = "seckill:order:";
+
     // 已下单id（集合）
     public static final String SECKILL_ORDER_KILLED = "seckill:order:killed:";
 

@@ -58,7 +58,12 @@ public class UserServiceImpl implements IUserService{
 
             log.info("{}登录: {}", username, token);
 
-            return UserLoginVO.builder().userId(user.getId()).username(user.getUsername()).token(token).build();
+            return UserLoginVO.builder()
+                    .userId(user.getId())
+                    .username(user.getUsername())
+                    .token(token)
+                    .role(user.getRole())
+                    .build();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -69,7 +74,11 @@ public class UserServiceImpl implements IUserService{
     public void logout(String token) {
         try {
             // 清理redis
-            redisUtil.expire(Constants.TOKEN_KEY + token, 0);
+            UserInfo user = (UserInfo) redisUtil.get(Constants.TOKEN_KEY + token);
+            if (!Objects.isNull(user)) {
+                redisUtil.expire(Constants.TOKEN_KEY + token, 0);
+                log.info("{}登出", user.getUsername());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
