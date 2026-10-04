@@ -1,6 +1,5 @@
 package com.lzh.controller;
 
-import com.lzh.entity.GoodsKillOrder;
 import com.lzh.entity.GoodsKillOrderVO;
 import com.lzh.entity.GoodsKillVO;
 import com.lzh.enums.OrderStatus;
@@ -51,15 +50,15 @@ public class SeckillController {
         return seckillService.getProducts();
     }
 
-    @Operation(summary = "订单号有效性检验")
-    @GetMapping("/check/order")
+    @Operation(summary = "订单号有效性检验（内部路径）")
+    @GetMapping("/internal/check/order")
     public boolean checkOrder(Long orderId, Integer userId) {
         return seckillService.checkOrder(orderId, userId, OrderStatus.WAIT);
     }
 
-    @Operation(summary = "支付成功，订单状态更新为PAID")
-    @PostMapping("/update/order/paid")
-    public void updateOrderStatusAfterPaid(@RequestParam("orderId") Long orderId) {
-        seckillService.updateOrderStatus(GoodsKillOrder.builder().orderId(orderId).build(), OrderStatus.PAID);
+    @Operation(summary = "支付成功，后处理（内部路径）")
+    @PostMapping("/postprocess")
+    public void postprocess(@RequestParam("orderId") Long orderId) {
+        seckillService.postProcess(orderId);
     }
 }

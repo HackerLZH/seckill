@@ -21,9 +21,7 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.lzh.entity.PaymentRequest;
 import com.lzh.entity.PaymentResponse;
-import com.lzh.feign.SeckillFeign;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -37,9 +35,6 @@ import java.util.Map;
 @Slf4j
 @Component
 public class AlipayPaymentStrategy implements PaymentStrategy {
-    @Autowired
-    private SeckillFeign seckillFeign;
-
     @NacosConfig(dataId = "payment-service.yml", group = "DEFAULT_GROUP", key = "alipay.app-id")
     private String appId;
 
@@ -166,9 +161,6 @@ public class AlipayPaymentStrategy implements PaymentStrategy {
             if ("TRADE_SUCCESS".equals(tradeStatus) || "TRADE_FINISHED".equals(tradeStatus)) {
                 log.info("支付宝支付成功，交易号: {}, 商户订单号: {}, 买家ID: {}",
                     tradeNo, outTradeNo, buyerId);
-
-                // 更新订单状态为已支付
-                seckillFeign.updateOrderStatusAfterPaid(Long.parseLong(outTradeNo));
 
                 return true;
             }

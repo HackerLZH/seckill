@@ -1,9 +1,8 @@
 package com.lzh;
 
+import com.feiniaojin.gracefulresponse.EnableGracefulResponse;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import com.feiniaojin.gracefulresponse.EnableGracefulResponse;
 
 @EnableGracefulResponse
 @SpringBootApplication

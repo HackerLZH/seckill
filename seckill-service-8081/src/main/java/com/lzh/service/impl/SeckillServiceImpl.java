@@ -1,6 +1,7 @@
 package com.lzh.service.impl;
 
 import cn.hutool.core.lang.Snowflake;
+import com.alibaba.cloud.nacos.annotation.NacosConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.feiniaojin.gracefulresponse.GracefulResponse;
@@ -10,12 +11,12 @@ import com.lzh.entity.GoodsKillVO;
 import com.lzh.enums.OrderStatus;
 import com.lzh.mapper.GoodsKillMapper;
 import com.lzh.mapper.GoodsKillOrderMapper;
+import com.lzh.mapper.GoodsMapper;
 import com.lzh.service.ISeckillService;
 import com.lzh.utils.RedisUtil;
 import com.lzh.utils.SeckillConstants;
 import com.lzh.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -23,8 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,12 +46,16 @@ public class SeckillServiceImpl implements ISeckillService {
     @Autowired
     private GoodsKillMapper goodsKillMapper;
     @Autowired
+    private GoodsMapper goodsMapper;
+    @Autowired
     private ObjectMapper objectMapper;
-    // @Autowired
-    // private Redisson redisson;
 
-    private static DefaultRedisScript <Long> SECK_SCRIPT = new DefaultRedisScript<>();
-    private static DefaultRedisScript <Long> ORDERIDEMP_SCRIPT = new DefaultRedisScript<>();
+    @NacosConfig(dataId = "seckill-service.yml", group = "DEFAULT_GROUP", key = "order.timeout")
+    Long orderTimeout;
+
+    private static DefaultRedisScript<Long> SECK_SCRIPT = new DefaultRedisScript<>();
+    private static DefaultRedisScript<Long> ORDERIDEMP_SCRIPT = new DefaultRedisScript<>();
+
     static {
         SECK_SCRIPT.setLocation(new ClassPathResource("seckill.lua"));
         SECK_SCRIPT.setResultType(Long.class);
@@ -62,10 +69,11 @@ public class SeckillServiceImpl implements ISeckillService {
             Integer userId = UserHolder.getUser().getId();
             // 使用lua脚本实现 扣减库存+一人一单， 保证原子性
             long res = (long) redisUtil.execute(
-                SECK_SCRIPT
-                , List.of(SeckillConstants.SECKILL_STORE_KEY, SeckillConstants.SECKILL_ORDER_KEY) // 传入keys
-                , String.valueOf(userId) // arg1
-                , String.valueOf(killId) // arg2
+                    SECK_SCRIPT
+                    , List.of(SeckillConstants.SECKILL_STORE_KEY, SeckillConstants.SECKILL_ORDER_KEY) // 传入keys
+                    , String.valueOf(userId) // arg1
+                    , String.valueOf(killId) // arg2
+                    , orderTimeout.toString() // arg3
             );
 
             if (res == 1) {
@@ -86,10 +94,10 @@ public class SeckillServiceImpl implements ISeckillService {
             }
             // 创建订单对象
             GoodsKillOrder goodsKillOrder = GoodsKillOrder.builder()
-                                                        .orderId(orderId)
-                                                        .userId(userId)
-                                                        .goodsKillId(killId)
-                                                        .build();
+                    .orderId(orderId)
+                    .userId(userId)
+                    .goodsKillId(killId)
+                    .build();
             // 设置消息TTL
 //        MessageProperties messageProperties = new MessageProperties();
 //        messageProperties.setExpiration("60000"); // 60s
@@ -102,11 +110,11 @@ public class SeckillServiceImpl implements ISeckillService {
 
             // MQ异步处理订单
             rabbitTemplate.convertAndSend(
-                SeckillConstants.MQ_KILL_GOOD_EXCHANGE
-                , SeckillConstants.MQ_KILL_GOOD_ROUTE
-                , message
+                    SeckillConstants.MQ_KILL_GOOD_EXCHANGE
+                    , SeckillConstants.MQ_KILL_GOOD_ROUTE
+                    , message
             );
-        } catch (AmqpException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -118,37 +126,16 @@ public class SeckillServiceImpl implements ISeckillService {
             String killedId = SeckillConstants.SECKILL_ORDER_KILLED + order.getGoodsKillId();
             // 消息幂等（Redis Set）
             Long res = (Long) redisUtil.execute(
-                ORDERIDEMP_SCRIPT
-                , List.of(killedId) // 缓存key
-                , order.getOrderId().toString() // 缓存value
-                , "1800" // 过期时间
+                    ORDERIDEMP_SCRIPT
+                    , List.of(killedId) // 缓存key
+                    , order.getOrderId().toString() // 缓存value
+                    , orderTimeout.toString() // 过期时间
             );
             if (res == 0) {
-                log.info("消息重复处理，skip：orderId={}", order.getOrderId());
+                log.warn("消息重复处理，skip：orderId={}", order.getOrderId());
                 // throw new RuntimeException("消息重复处理");
                 return;
             }
-
-            // 查询商品id （分布式锁）
-            // String cacheKey = SeckillConstants.CACHE_GOODSID_KILLID + order.getGoodsKillId();
-            // RLock rlock = redisson.getLock(cacheKey);
-            // rlock.lock();
-            // try {
-            //     String goodsId = (String)redisUtil.get(cacheKey);
-            //     if (Objects.isNull(goodsId)) {
-            //         redisUtil.set(
-            //             cacheKey
-            //             , goodsKillMapper.findgoodsId(order.getGoodsKillId())
-            //             , 3L);
-            //     }
-            // } finally {
-            //     rlock.unlock();
-            // }
-            // 扣减库存
-            // goodsMapper.cutStock(goodsId, 1); // 商品总库存待支付后再扣减
-
-            // 锁竞争激烈导致slow sql，等支付后统一扣减
-            // goodsKillMapper.cutStock(order.getGoodsKillId());
 
             // 保存订单
             goodsKillOrderMapper.insert(order);
@@ -187,7 +174,7 @@ public class SeckillServiceImpl implements ISeckillService {
                 info.setStartTime(item.getStartTime());
                 info.setStock(item.getStock());
 
-                Integer availableStock = (Integer)redisUtil.get(SeckillConstants.SECKILL_STORE_KEY + item.getId());
+                Integer availableStock = (Integer) redisUtil.get(SeckillConstants.SECKILL_STORE_KEY + item.getId());
                 info.setAvailableStock(availableStock != null ? availableStock : 0);
 
                 return info;
@@ -222,4 +209,39 @@ public class SeckillServiceImpl implements ISeckillService {
             return false;
         }
     }
+
+    @Transactional
+    @Override
+    public void postProcess(Long orderId) {
+        try {
+            // 状态更新
+            updateOrderStatus(GoodsKillOrder.builder().orderId(orderId).build(), OrderStatus.PAID);
+            // 扣减库存
+            GoodsKillOrder order = goodsKillOrderMapper.findKillOrderByOrderId(orderId);
+            if (order == null) {
+                throw new NoSuchElementException(String.format("订单%d不存在", orderId));
+            }
+
+            Integer killId = order.getGoodsKillId();
+            int killRows = goodsKillMapper.cutStock(killId);
+            if (killRows == 0) {
+                throw new RuntimeException(String.format("秒杀%d库存不足", killId));
+            }
+
+            Integer goodsId = goodsKillMapper.findGoodsId(killId);
+            if (goodsId == null) {
+                throw new NoSuchElementException(String.format("商品%d不存在", goodsId));
+            }
+
+            int goodsRows = goodsMapper.cutStock(goodsId, 1);
+            if (goodsRows == 0) {
+                throw new RuntimeException(String.format("商品%d库存不足", goodsId));
+            }
+        } catch (Exception e) {
+            // 系统异常：兜底，记录详细日志
+            log.error("支付后处理异常，orderId={}", orderId, e);
+            throw e;
+        }
+    }
+
 }

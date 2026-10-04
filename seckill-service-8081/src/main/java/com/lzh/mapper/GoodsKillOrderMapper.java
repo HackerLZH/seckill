@@ -1,14 +1,9 @@
 package com.lzh.mapper;
 
-import com.lzh.entity.GoodsKillOrderVO;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
-
 import com.lzh.entity.GoodsKillOrder;
+import com.lzh.entity.GoodsKillOrderVO;
 import com.lzh.enums.OrderStatus;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -33,5 +28,8 @@ public interface GoodsKillOrderMapper {
     List<GoodsKillOrderVO> findOrdersByUserId(@Param("user_id") Integer id);
 
     @Select("select * from goods_kill_order where order_id = #{orderId}")
+    @Results({
+            @Result(column = "kill_id", property = "goodsKillId")
+    })
     GoodsKillOrder findKillOrderByOrderId(@Param("orderId") Long orderId);
 }

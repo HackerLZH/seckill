@@ -16,7 +16,7 @@ public interface GoodsKillMapper {
      * @return
      */
     @Select("select goods_id from goods_kill where id = #{killId}")
-    Integer findgoodsId(int killId);
+    Integer findGoodsId(int killId);
 
     /**
      * 库存扣减
@@ -25,7 +25,8 @@ public interface GoodsKillMapper {
      */
     @Update("update goods_kill set stock = stock - 1 " 
             + "where id = #{id} and stock > 0")
-    void cutStock(@Param("id") int id);
+    int cutStock(@Param("id") Integer id);
+
     @Update("update goods_kill set stock = stock + #{num} where id = #{id}")
     void addStock(@Param("id") int id, @Param("num") int num);
 

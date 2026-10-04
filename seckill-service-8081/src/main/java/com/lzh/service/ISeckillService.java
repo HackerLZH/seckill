@@ -38,4 +38,10 @@ public interface ISeckillService {
     List<GoodsKillOrderVO> getKillOrders();
 
     boolean checkOrder(Long orderId, Integer userId, OrderStatus orderStatus);
+
+    /**
+     * 支付成功后处理
+     * @param orderId
+     */
+    void postProcess(Long orderId);
 }

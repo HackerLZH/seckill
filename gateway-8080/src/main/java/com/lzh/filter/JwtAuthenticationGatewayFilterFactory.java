@@ -40,6 +40,12 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
             if (config.getExcludePath().stream().anyMatch(path::startsWith)) {
                 return chain.filter(exchange);
             }
+            // 拒绝内部路径
+            if (path.contains("/internal/")) {
+                log.warn("内部路径：{}", path);
+                exchange.getResponse().setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
+                return exchange.getResponse().setComplete();
+            }
             // token是否有效
             String token = exchange.getRequest().getHeaders().getFirst(Constants.TOKEN_HEADER);
             log.info(token);

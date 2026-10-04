@@ -32,6 +32,7 @@ public class RabbitConsumer {
         try {
             seckikkillService.saveOrder(order);
             if (tryAck(channel, tag)) {
+                log.info("{}已下单，消费号:{}", order.getOrderId(), tag);
                 // 进入订单支付倒计时（延时队列无消费者）
                 rabbitTemplate.convertAndSend(
                     SeckillConstants.MQ_KILL_GOOD_ORDER_EXCHANGE
@@ -54,9 +55,7 @@ public class RabbitConsumer {
     public void consumeKillGoodDLX(GoodsKillOrder order, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long tag) {
         try {
             seckikkillService.updateOrderStatus(order, OrderStatus.CANCEL);
-            if (!tryAck(channel, tag)) {
-                return;
-            }
+            tryAck(channel, tag);
         } catch (Exception e) {
             tryNack(channel, tag);
             log.error("超时订单消费失败：{}", e.getMessage());
@@ -66,7 +65,7 @@ public class RabbitConsumer {
 
     private boolean tryAck(Channel channel, long tag) {
         try {
-            channel.basicAck(tag, false);
+            channel.basicAck(tag, false); // 单条确认
             return true;
         } catch (IOException e) {
             log.error("消息确认失败：{}", e.getMessage());
@@ -76,10 +75,11 @@ public class RabbitConsumer {
 
     private boolean tryNack(Channel channel, long tag) { 
         try {
-            channel.basicNack(tag, false, true);
+            channel.basicNack(tag, false, true); // 单挑拒绝，重新入队
+            log.info("消费号{}重新入队", tag);
             return true;
         } catch (IOException e) {
-            log.error("消息拒绝失败：{}", e.getMessage());        
+            log.error("消息拒绝失败：{}", e.getMessage());
             return false;
         }   
     }
