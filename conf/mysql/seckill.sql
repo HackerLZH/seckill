@@ -36,16 +36,6 @@ CREATE TABLE `goods` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `goods`
---
-
-LOCK TABLES `goods` WRITE;
-/*!40000 ALTER TABLE `goods` DISABLE KEYS */;
-INSERT INTO `goods` VALUES (1,'iphone16',12999.00,1000,'https://beeimg.us.ci/temp/6abe7045031ec.jpg','2025-05-14 14:01:54','ACTIVE'),(2,'小米18 Pro',5999.00,10000,'https://beeimg.us.ci/temp/6abe76fc04a79.png','2026-09-25 13:33:20','ACTIVE');
-/*!40000 ALTER TABLE `goods` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `goods_kill`
 --
 
@@ -65,16 +55,6 @@ CREATE TABLE `goods_kill` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `goods_kill`
---
-
-LOCK TABLES `goods_kill` WRITE;
-/*!40000 ALTER TABLE `goods_kill` DISABLE KEYS */;
-INSERT INTO `goods_kill` VALUES (1,1,100,'1970-01-01 00:00:00','1970-01-01 00:00:10','2025-05-14 14:01:54','ACTIVE'),(2,2,100,'2027-06-14 15:00:00','2027-06-14 16:00:00','2026-10-01 23:29:05','ACTIVE'),(3,1,1000,'2026-09-14 16:00:00','2027-09-14 16:00:00','2026-10-02 01:41:15','ACTIVE');
-/*!40000 ALTER TABLE `goods_kill` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `goods_kill_order`
 --
 
@@ -85,22 +65,13 @@ CREATE TABLE `goods_kill_order` (
   `order_id` bigint NOT NULL COMMENT '订单id',
   `user_id` int NOT NULL COMMENT '下单用户',
   `kill_id` int NOT NULL COMMENT '秒杀id',
+  `qrcodeurl` varchar(512) DEFAULT NULL,
   `status` enum('WAIT','PAID','CANCEL') NOT NULL DEFAULT 'WAIT' COMMENT '订单状态（WAIT,PAID,CANCEL）',
   `create_time` datetime NOT NULL COMMENT '下单时间',
   `pay_time` datetime DEFAULT NULL COMMENT '支付时间',
   PRIMARY KEY (`order_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='秒杀订单表';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `goods_kill_order`
---
-
-LOCK TABLES `goods_kill_order` WRITE;
-/*!40000 ALTER TABLE `goods_kill_order` DISABLE KEYS */;
-INSERT INTO `goods_kill_order` VALUES (1942924729838510080,2,1,'CANCEL','2025-07-09 20:32:08',NULL),(1943224199729963008,2,1,'CANCEL','2025-07-10 16:22:07',NULL),(1943227172518420480,2,1,'CANCEL','2025-07-10 16:33:56',NULL),(1943227799730458624,2,1,'CANCEL','2025-07-10 16:36:25',NULL),(1943232363284217856,2,1,'CANCEL','2025-07-10 16:54:33',NULL);
-/*!40000 ALTER TABLE `goods_kill_order` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `user`
@@ -120,6 +91,7 @@ CREATE TABLE `user` (
   `phone` varchar(100) DEFAULT NULL COMMENT '电话',
   `address` varchar(100) DEFAULT NULL COMMENT '地址',
   `create_time` datetime NOT NULL COMMENT '创建时间',
+  `login_time` datetime DEFAULT NULL,
   `is_active` enum('ACTIVE','INACTIVE') NOT NULL DEFAULT 'ACTIVE' COMMENT '状态',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_name` (`username`),
@@ -127,16 +99,6 @@ CREATE TABLE `user` (
   UNIQUE KEY `idx_phone` (`phone`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COMMENT='用户信息表';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user`
---
-
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (2,'U','lzh','123123',0,'UNKNOWN',NULL,NULL,NULL,'2025-07-09 20:13:20','ACTIVE'),(3,'A','admin','admin',0,'UNKNOWN',NULL,NULL,NULL,'2025-07-10 15:51:06','ACTIVE');
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -147,4 +109,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-10-02  1:53:34
+-- Dump completed on 2026-10-06  0:19:57
