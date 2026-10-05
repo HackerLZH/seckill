@@ -6,8 +6,19 @@ if (window.location.hostname === "localhost") {
 }
 
 const token_key = 'SeckillAuthorization';
+const expire_key = 'expire';
 const username_key = 'username';
 const role_key = 'role';
+
+function checkLogin() {
+    // 检查是否存在 SeckillAuthorization 令牌
+    const token = localStorage.getItem(token_key);
+    if(!token) { // 如果没有令牌，则显示登录模态框
+        $('#loginModal').modal('show');
+        return null;
+    }
+    return token;
+}
 
 // 显示 Toast 通知
 function showToast(title, message, type = 'info') {
@@ -50,12 +61,18 @@ $(document).ready(function() {
 
 // 检查登录状态并恢复 UI
 function restoreLoginState() {
-    const token = localStorage.getItem(token_key);
+    let token = checkLogin();
     if (!token) {
         return;
     }
     const username = localStorage.getItem(username_key);
-    const role = localStorage.getItem(role_key)
+    const role = localStorage.getItem(role_key);
+    const expireTime = localStorage.getItem(expire_key);
+    if (new Date().getTime() > expireTime) {
+        // token过期
+        clearState();
+        return;
+    }
     // token 有效，恢复登录状态
     $('#loginBtn').hide();
     $('#usernameDisplay').text(username);
@@ -115,7 +132,7 @@ function createProductCardHTML(product, containerId) {
                             </div>
                             <small class="text-muted">已售${soldPercent}%，仅剩${product.availableStock}件</small>
                             <button class="${product.availableStock === 0? 'btn btn-outline-secondary w-100' : 'btn seckill-btn w-100 mt-2'}"
-                                onclick="checkLogin(${product.id}, '${product.name}', '${product.image}', ${product.price})"
+                                onclick="doKill(${product.id}, '${product.name}', '${product.image}', ${product.price})"
                                 ${product.availableStock === 0? 'disabled' : ''}>
                             立即秒杀
                             </button>
@@ -142,13 +159,11 @@ function createProductCardHTML(product, containerId) {
                 `;
     }
 }
-// checkLogin(${product.id}, ${product.name}, ${product.image}, ${product.price})
-function checkLogin(killId, name, imageUrl, price) {
-    // 检查是否存在 SeckillAuthorization 令牌
-    const token = localStorage.getItem(token_key);
-    if(!token) { // 如果没有令牌，则显示登录模态框
-        $('#loginModal').modal('show');
-        return false;
+
+function doKill(killId, name, imageUrl, price) {
+    let token = checkLogin();
+    if (!token) {
+        return;
     }
     // 执行秒杀逻辑
     $.ajax({
@@ -268,8 +283,11 @@ function initiatePayment(orderId, name, price, payType) {
                 // 根据支付类型处理
                 if (payType === 'WECHAT') {
                     // 微信支付 - 显示二维码或调用微信支付
+                    // TODO 当前仅模拟
+                    showToast('🎉 支付成功！', '恭喜您，秒杀商品购买成功！', 'success');
+                    return;
                     if (response.qrCodeUrl) {
-                        showQRCode(response.qrCodeUrl);
+                        showQRCode(response.qrCodeUrl, orderId, 'WECHAT');
                     } else {
                         // 调用微信支付JSAPI
                         callWechatPay(response.signData);
@@ -277,7 +295,7 @@ function initiatePayment(orderId, name, price, payType) {
                 } else if (payType === 'ALIPAY') {
                     // 支付宝支付 - 跳转到支付宝支付页面
                     if (response.qrCodeUrl) {
-                        showQRCode(response.qrCodeUrl);
+                        showQRCode(response.qrCodeUrl, orderId, 'ALIPAY');
                     } else {
                         // 调用支付宝支付
                         callAlipay(response.signData);
@@ -297,11 +315,14 @@ function initiatePayment(orderId, name, price, payType) {
 // 稍后支付
 function laterPayment(orderId) {
     $('#paymentModal').modal('hide');
-    alert('已记录您的订单，您可以在个人中心查看并完成支付');
+    showToast('未支付', '已记录您的订单，您可以在购物车查看并完成支付', 'warning');
 }
 
-// 显示二维码
-function showQRCode(qrCodeUrl) {
+// 全局变量用于存储轮询定时器
+let paymentPollTimer = null;
+
+// 显示二维码 + 启动支付状态轮询
+function showQRCode(qrCodeUrl, orderId, payType) {
     const qrModalContent = `
         <div class="modal fade" id="qrModal" tabindex="-1">
             <div class="modal-dialog">
@@ -312,7 +333,8 @@ function showQRCode(qrCodeUrl) {
                     </div>
                     <div class="modal-body text-center">
                         <div id="qrcode-container" class="d-flex justify-content-center mb-3"></div>
-                        <p>请使用${qrCodeUrl.includes('weixin') ? '微信' : '支付宝沙箱版'}扫描二维码完成支付</p>
+                        <p>请使用${payType === 'WECHAT' ? '微信' : '<a href="https://u.alipay.cn/_7AkhPZNjSvwrRjSiiuPO9o">支付宝沙箱版</a>'}扫描二维码完成支付</p>
+                        <small class="text-muted d-block mt-2">支付结果将在 2 分钟内自动确认</small>
                     </div>
                 </div>
             </div>
@@ -329,17 +351,89 @@ function showQRCode(qrCodeUrl) {
         qrcodeContainer.innerHTML = ''; // 清空容器
         new QRCode(qrcodeContainer, {
             text: qrCodeUrl,
-            width: 200,
-            height: 200,
+            width: 250,
+            height: 250,
             colorDark : "#000000",
             colorLight : "#ffffff",
             correctLevel : QRCode.CorrectLevel.H
         });
     });
 
+    // 启动支付状态轮询
+    startPaymentPolling(orderId, payType);
+
+    // 监听模态框关闭事件，清理DOM和停止轮询
     $('#qrModal').on('hidden.bs.modal', function () {
+        stopPaymentPolling();
         $(this).remove();
     });
+}
+
+// 启动支付状态轮询
+function startPaymentPolling(orderId, payType) {
+    // 停止之前的轮询（如果存在）
+    stopPaymentPolling();
+
+    let pollCount = 0;
+    const MAX_POLL_COUNT = 40; // 最多轮询40次（约2分钟）
+
+    paymentPollTimer = setInterval(() => {
+        if (pollCount >= MAX_POLL_COUNT) {
+            clearInterval(paymentPollTimer);
+            paymentPollTimer = null;
+            $('#qrModal').modal('hide');
+            showToast('支付超时', '未在规定时间内完成支付，订单已关闭', 'warning');
+            return;
+        }
+
+        $.ajax({
+            url: `${RQ_PREF}/payment/status/${payType}/${orderId}`,
+            method: 'GET',
+            headers: {
+                [token_key]: localStorage.getItem(token_key)
+            },
+            success: function(response) {
+                if (!response.success) {
+                    // 查询失败，继续轮询（可能是网络问题）
+                    console.warn('查询支付状态失败:', response.message);
+                    return;
+                }
+
+                const tradeStatus = response.message; // 支付宝返回 TRADE_SUCCESS/WAIT_BUYER_PAY 等
+
+                switch(tradeStatus) {
+                    case 'TRADE_SUCCESS':
+                        clearInterval(paymentPollTimer);
+                        paymentPollTimer = null;
+                        $('#qrModal').modal('hide');
+                        showToast('🎉 支付成功！', '恭喜您，秒杀商品购买成功！', 'success');
+                        break;
+                    case 'TRADE_FINISHED': // 无状态
+                    case 'TRADE_CLOSED': // 无状态
+                    case 'WAIT_BUYER_PAY':
+                        // 继续轮询，无需提示
+                        console.log('等待用户支付...');
+                        break;
+                    default:
+                        console.log('未知支付状态:', tradeStatus);
+                }
+            },
+            error: function(xhr, status, error) {
+                // 网络错误，继续轮询
+                console.warn('轮询请求失败，继续...', error);
+            }
+        });
+
+        pollCount++;
+    }, 3000); // 每3秒查询一次
+}
+
+// 停止支付状态轮询
+function stopPaymentPolling() {
+    if (paymentPollTimer) {
+        clearInterval(paymentPollTimer);
+        paymentPollTimer = null;
+    }
 }
 
 // 调用微信支付
@@ -391,7 +485,8 @@ $('#loginForm').submit(function(e) {
             // 保存数据到 localStorage
             localStorage.setItem(token_key, response.data.token);
             localStorage.setItem(username_key, response.data.username);
-            localStorage.setItem(role_key, response.data.role)
+            localStorage.setItem(role_key, response.data.role);
+            localStorage.setItem(expire_key, new Date(response.data.expireTime).getTime());
         },
         error: function(xhr, status, error) {
             alert('登录失败：' + (xhr.responseJSON ? xhr.responseJSON.message : '未知错误'));
@@ -450,16 +545,17 @@ $('#logoutBtn').click(function(e) {
             [token_key]: localStorage.getItem(token_key)
         },
         success: function(response) {
-            // 清除本地存储的令牌
-            // localStorage.removeItem(token_key);
-            // localStorage.removeItem(username_key);
-            localStorage.clear();
-            // 隐藏用户菜单，显示登录按钮
-            $('#userMenu').hide();
-            $('#loginBtn').show();
+            clearState();
         },
         error: function(xhr, status, error) {
             alert('登出失败:' + (xhr.responseJSON ? xhr.responseJSON.message : '未知错误'));
         }
     })
 });
+
+function clearState() {
+    localStorage.clear();
+    // 隐藏用户菜单，显示登录按钮
+    $('#userMenu').hide();
+    $('#loginBtn').show();
+}

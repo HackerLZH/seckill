@@ -61,22 +61,7 @@ public class AlipayPaymentStrategy implements PaymentStrategy {
         log.info("发起支付宝支付，订单号: {}, 金额: {}元", request.getOrderId(), request.getAmount());
 
         try {
-            if (alipayClient == null) {
-                synchronized (this) {
-                    if (alipayClient == null) {
-                        alipayClient = new DefaultAlipayClient(
-                                gatewayUrl,
-                                appId,
-                                privateKey,
-                                "json",
-                                "UTF-8",
-                                publicKey,
-                                "RSA2"
-                        );
-                        log.info("支付宝沙箱环境初始化完成，APP_ID: {}", appId);
-                    }
-                }
-            }
+            initClient();
             // 创建预下单请求
             AlipayTradePrecreateRequest precreateRequest = new AlipayTradePrecreateRequest();
             precreateRequest.setNotifyUrl(notifyUrl);
@@ -175,29 +160,14 @@ public class AlipayPaymentStrategy implements PaymentStrategy {
         log.info("查询支付宝支付状态，订单号: {}", orderId);
 
         try {
-            if (alipayClient == null) {
-                synchronized (this) {
-                    if (alipayClient == null) {
-                        alipayClient = new DefaultAlipayClient(
-                                gatewayUrl,
-                                appId,
-                                privateKey,
-                                "json",
-                                "UTF-8",
-                                publicKey,
-                                "RSA2"
-                        );
-                        log.info("支付宝沙箱环境初始化完成，APP_ID: {}", appId);
-                    }
-                }
-            }
+            initClient();
             AlipayTradeQueryRequest queryRequest = new AlipayTradeQueryRequest();
             AlipayTradeQueryModel model = new AlipayTradeQueryModel();
             model.setOutTradeNo(String.valueOf(orderId));
             queryRequest.setBizModel(model);
 
             AlipayTradeQueryResponse response = alipayClient.execute(queryRequest);
-
+//            log.info("{}", response.getBody());
             if (response.isSuccess()) {
                 log.info("支付宝订单查询成功，交易状态: {}", response.getTradeStatus());
 
@@ -270,6 +240,28 @@ public class AlipayPaymentStrategy implements PaymentStrategy {
         } catch (AlipayApiException e) {
             log.error("支付宝退款申请异常", e);
             return PaymentResponse.fail("REFUND_ERROR", "退款失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 初始化alipayClient
+     */
+    private void initClient() {
+        if (alipayClient == null) {
+            synchronized (this) {
+                if (alipayClient == null) {
+                    alipayClient = new DefaultAlipayClient(
+                            gatewayUrl,
+                            appId,
+                            privateKey,
+                            "json",
+                            "UTF-8",
+                            publicKey,
+                            "RSA2"
+                    );
+                    log.info("支付宝沙箱环境初始化完成，APP_ID: {}", appId);
+                }
+            }
         }
     }
 }

@@ -29,7 +29,7 @@ public class UserServiceImpl implements IUserService{
     private RedisUtil redisUtil;
 
     @NacosConfig(dataId = "common.yml", group = "EXT_GROUP", key = "token.timeout")
-    private Integer tokenTimeout;
+    private Integer tokenTimeout; // 分钟
     @Override
     public UserLoginVO login(String username, String password) {
         // 判断是否已登录
@@ -56,14 +56,21 @@ public class UserServiceImpl implements IUserService{
             // redis保存token
             redisUtil.set(Constants.TOKEN_KEY + token, user, tokenTimeout, TimeUnit.MINUTES);
 
-            log.info("{}登录: {}", username, token);
-
-            return UserLoginVO.builder()
+            LocalDateTime now = LocalDateTime.now();
+            log.info("{} {}登录: {}", now, username, token);
+            UserLoginVO loginUser = UserLoginVO.builder()
                     .userId(user.getId())
                     .username(user.getUsername())
                     .token(token)
                     .role(user.getRole())
+                    .loginTime(now)
+                    .expireTime(now.plusMinutes(tokenTimeout))
                     .build();
+            if (userMapper.update(loginUser) == 1) {
+                return loginUser;
+            }
+            log.error("更新用户登录时间失败");
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
