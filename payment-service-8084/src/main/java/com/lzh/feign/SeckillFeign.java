@@ -12,4 +12,7 @@ public interface SeckillFeign {
 
     @PostMapping("/internal/postprocess")
     void postprocess(@RequestParam("orderId") Long orderId);
+
+    @PostMapping("/internal/insert/qrcode")
+    void insertQrCode(@RequestParam("orderId") Long orderId, @RequestParam("qrcode") String qrCode);
 }

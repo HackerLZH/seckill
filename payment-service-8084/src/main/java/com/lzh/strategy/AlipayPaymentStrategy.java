@@ -17,7 +17,9 @@ import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lzh.entity.PaymentRequest;
 import com.lzh.entity.PaymentResponse;
+import com.lzh.feign.SeckillFeign;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -47,6 +49,9 @@ public class AlipayPaymentStrategy implements PaymentStrategy {
 
     @NacosConfig(dataId = "payment-service.yml", group = "DEFAULT_GROUP", key = "payment.timeout")
     private String timeout;
+
+    @Autowired
+    private SeckillFeign seckillFeign;
 
     private volatile AlipayClient alipayClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -81,7 +86,7 @@ public class AlipayPaymentStrategy implements PaymentStrategy {
             if (response.isSuccess()) {
                 log.info("支付宝预下单成功，订单号: {}, 二维码链接: {}",
                     response.getOutTradeNo(), response.getQrCode());
-
+                seckillFeign.insertQrCode(Long.parseLong(response.getOutTradeNo()), response.getQrCode());
                 // 保存二维码图片（测试）
 //                BitMatrix matrix = new MultiFormatWriter().encode(response.getQrCode(), BarcodeFormat.QR_CODE, 300, 300);
 //                File file = new File("/tmp/qr-code.png");
