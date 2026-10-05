@@ -34,8 +34,9 @@ public class UserServiceImpl implements IUserService{
     public UserLoginVO login(String username, String password) {
         // 判断是否已登录
         if (!Objects.isNull(UserHolder.getUser())) {
-            log.error("{}已登录", username);
-            GracefulResponse.raiseException(Constants.LOGIN_DUPICATE);
+            // 前端localStorage意外清空
+            log.warn("{}重新登录", username);
+//            GracefulResponse.raiseException(Constants.LOGIN_DUPICATE);
         }
         // 用户名是否存在
         UserInfo user = userMapper.getUserByName(username);
@@ -52,12 +53,13 @@ public class UserServiceImpl implements IUserService{
         try {
             // 生成token
             String token = JwtUtil.createToken(username, password);
-
+            LocalDateTime now = LocalDateTime.now();
+            // 更新login time
+            user.setLoginTime(now);
             // redis保存token
             redisUtil.set(Constants.TOKEN_KEY + token, user, tokenTimeout, TimeUnit.MINUTES);
-
-            LocalDateTime now = LocalDateTime.now();
             log.info("{} {}登录: {}", now, username, token);
+
             UserLoginVO loginUser = UserLoginVO.builder()
                     .userId(user.getId())
                     .username(user.getUsername())

@@ -222,6 +222,7 @@ public class SeckillServiceImpl implements ISeckillService {
         try {
             // 状态更新
             updateOrderStatus(GoodsKillOrder.builder().orderId(orderId).build(), OrderStatus.PAID);
+            goodsKillOrderMapper.updatePayTime(orderId);
             // 扣减库存
             GoodsKillOrder order = goodsKillOrderMapper.findKillOrderByOrderId(orderId);
             if (order == null) {
@@ -247,6 +248,20 @@ public class SeckillServiceImpl implements ISeckillService {
             // 系统异常：兜底，记录详细日志
             log.error("支付后处理异常，orderId={}", orderId, e);
             throw e;
+        }
+    }
+
+    @Override
+    public void insertQrCode(Long orderId, String qrCode) {
+        try {
+            GoodsKillOrder goodsKillOrder = GoodsKillOrder.builder()
+                    .orderId(orderId)
+                    .qrcodeurl(qrCode)
+                    .build();
+            goodsKillOrderMapper.updateQrCode(goodsKillOrder);
+            log.info("订单{}：更新二维码地址", orderId);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

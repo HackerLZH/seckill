@@ -61,4 +61,10 @@ public class SeckillController {
     public void postprocess(@RequestParam("orderId") Long orderId) {
         seckillService.postProcess(orderId);
     }
+
+    @Operation(summary = "扫码成功，保存二维码地址（内部路径）")
+    @PostMapping("/internal/insert/qrcode")
+    void insertQrCode(@RequestParam("orderId") Long orderId, @RequestParam("qrcode") String qrCode) {
+        seckillService.insertQrCode(orderId, qrCode);
+    }
 }

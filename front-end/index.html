@@ -36,7 +36,7 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle"></i> 用户信息</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-shopping-cart"></i> 购物车</a></li>
+                            <li><a class="dropdown-item" href="#" id="cartBtn"><i class="fas fa-shopping-cart"></i> 购物车</a></li>
                             <li id="seckillManageItem" style="display: none;"><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> 秒杀管理</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> 退出登录</a></li>
@@ -98,6 +98,26 @@
                         </div>
                         <button type="submit" class="btn btn-primary w-100">注册</button>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 购物车（我的订单）模态框 -->
+    <div class="modal fade" id="cartModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-shopping-cart"></i> 我的订单</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="order-list-container">
+                        <div class="text-center text-muted py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2 mb-0">正在加载订单...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

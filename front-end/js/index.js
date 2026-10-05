@@ -57,6 +57,9 @@ function showToast(title, message, type = 'info') {
 $(document).ready(function() {
     fetchSeckillProducts();
     restoreLoginState();
+    // 页面关闭 / 刷新时停止支付轮询，避免残留请求（覆盖 bfcache 恢复场景）
+    window.addEventListener('pagehide', stopPaymentPolling);
+    window.addEventListener('beforeunload', stopPaymentPolling);
 });
 
 // 检查登录状态并恢复 UI
@@ -260,7 +263,6 @@ function showPaymentSelection(orderId, name, imageUrl, price) {
 function initiatePayment(orderId, name, price, payType) {
     // 隐藏支付选择模态框
     $('#paymentModal').modal('hide');
-    console.log(orderId);
     // 构造支付请求
     const paymentRequest = {
         orderId: orderId,
@@ -395,7 +397,7 @@ function startPaymentPolling(orderId, payType) {
             success: function(response) {
                 if (!response.success) {
                     // 查询失败，继续轮询（可能是网络问题）
-                    console.warn('查询支付状态失败:', response.message);
+                    // console.warn('网络问题请等待');
                     return;
                 }
 
@@ -456,6 +458,153 @@ function callAlipay(signData) {
     // window.location.href = signData.payUrl;
 }
 
+// 点击购物车按钮
+$('#cartBtn').click(function(e) {
+    e.preventDefault();
+    const token = checkLogin();
+    if (!token) {
+        $('#loginModal').modal('show');
+        return;
+    }
+    loadOrders();
+    $('#cartModal').modal('show');
+});
+
+// 加载订单列表
+function loadOrders() {
+    const token = localStorage.getItem(token_key);
+    if (!token) return;
+
+    $.ajax({
+        url: `${RQ_PREF}/seckill/kill/orders`,
+        method: 'GET',
+        headers: {
+            [token_key]: token
+        },
+        success: function(response) {
+            renderOrderList(response);
+        },
+        error: function(xhr, status, error) {
+            $('#order-list-container').html(`
+                <div class="text-center py-4">
+                    <i class="fas fa-exclamation-circle text-warning fa-3x mb-3"></i>
+                    <h6>订单加载失败</h6>
+                    <p class="text-muted">请稍后重试</p>
+                </div>
+            `);
+            console.error('加载订单失败:', error);
+        }
+    });
+}
+
+// 渲染订单列表
+function renderOrderList(orders) {
+    if (!orders || orders.length === 0) {
+        $('#order-list-container').html(`
+            <div class="text-center py-4">
+                <i class="fas fa-shopping-cart text-muted fa-3x mb-3"></i>
+                <h6>暂无订单</h6>
+                <p class="text-muted">快去参与秒杀吧</p>
+            </div>
+        `);
+        return;
+    }
+
+    let html = '<div class="accordion" id="ordersAccordion">';
+
+    orders.data.forEach((order, index) => {
+        const orderId = order.orderId;
+        const formattedTime = order.createTime ? new Date(order.createTime).toLocaleString() : '--';
+        const payTime = order.payTime ? new Date(order.payTime).toLocaleString() : '--';
+        const price = order.price ? parseFloat(order.price).toFixed(2) : '0.00';
+        const status = order.status || 'WAIT';
+        const qrcodeurl = order.qrcodeurl || '';
+
+        let statusBadge = '';
+        let actionButton = '';
+
+        switch(status) {
+            case 'WAIT':
+                statusBadge = '<span class="badge bg-warning text-dark">待支付</span>';
+                if (qrcodeurl) {
+                    actionButton = `
+                        <button class="btn btn-primary btn-sm" onclick="resumePayment('${orderId}', '${encodeURIComponent(order.name)}', ${order.price}, '${qrcodeurl}')">
+                            <i class="fas fa-qrcode"></i> 继续支付
+                        </button>
+                    `;
+                } else {
+                    actionButton = `<span class="text-muted">等待生成支付二维码...</span>`;
+                }
+                break;
+            case 'PAID':
+                statusBadge = '<span class="badge bg-success">已支付</span>';
+                actionButton = `<button class="btn btn-outline-success btn-sm" disabled>已支付于 ${payTime}</button>`;
+                break;
+            case 'CANCEL':
+                statusBadge = '<span class="badge bg-secondary">已取消</span>';
+                actionButton = `<button class="btn btn-outline-secondary btn-sm" disabled>订单已取消</button>`;
+                break;
+        }
+
+        html += `
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading${index}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}" aria-expanded="false" aria-controls="collapse${index}">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <div>
+                                <span class="fw-bold">订单 #${orderId}</span>
+                                ${statusBadge}
+                            </div>
+                            <div class="text-muted">${formattedTime}</div>
+                        </div>
+                    </button>
+                </h2>
+                <div id="collapse${index}" class="accordion-collapse collapse" aria-labelledby="heading${index}" data-bs-parent="#ordersAccordion">
+                    <div class="accordion-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="${order.image || 'https://via.placeholder.com/80'}" alt="${order.name}" class="rounded me-3" style="width: Ан80px; height: 80px; object-fit: cover;">
+                            <div>
+                                <h6 class="mb-1">${order.name || '秒杀商品'}</h6>
+                                <p class="mb-1 text-muted">订单号: ${orderId}</p>
+                                <p class="mb-0 text-danger fw-bold">价格：¥${price}</p>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div>
+                                <small class="text-muted">创建时间：${formattedTime}</small>
+                                ${order.payTime ? `<br><small class="text-muted">支付时间：${payTime}</small>` : ''}
+                            </div>
+                            <div>${actionButton}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    html += '</div>';
+    $('#order-list-container').html(html);
+}
+
+// 恢复支付（从购物车继续）
+function resumePayment(orderId, name, price, qrcodeUrl) {
+    const decodedName = decodeURIComponent(name);
+
+    // Determine payType from qrcodeUrl
+    let payType;
+    if (qrcodeUrl.includes('weixin')) {
+        payType = 'WECHAT';
+    } else if (qrcodeUrl.includes('alipay')) {
+        payType = 'ALIPAY';
+    } else {
+        // Default to WECHAT for unknown cases
+        payType = 'WECHAT';
+    }
+
+    showQRCode(qrcodeUrl, orderId, payType);
+    $('#cartModal').modal('hide');
+}
+
 $('#loginForm').submit(function(e) {
     e.preventDefault();
 
@@ -471,22 +620,24 @@ $('#loginForm').submit(function(e) {
             password: password
         }),
         success: function(response) {
-            $('#loginModal').modal('hide');
-            $('#loginForm')[0].reset();
-            // 隐藏登录按钮，显示用户菜单
-            $('#loginBtn').hide();
-            $('#usernameDisplay').text(response.data.username);
-            $('#userMenu').show();
-            if (response.data.role === 'A') {
-                $('#seckillManageItem').show();
+            if (response.code === '520002' || response.code === '520003') {
+                showToast("登录失败", response.msg, 'danger');
             } else {
-                $('#seckillManageItem').hide();
+                $('#loginModal').modal('hide');
+                $('#loginForm')[0].reset();
+                $('#loginBtn').hide();
+                $('#usernameDisplay').text(response.data.username);
+                $('#userMenu').show();
+                if (response.data.role === 'A') {
+                    $('#seckillManageItem').show();
+                } else {
+                    $('#seckillManageItem').hide();
+                }
+                localStorage.setItem(token_key, response.data.token);
+                localStorage.setItem(username_key, response.data.username);
+                localStorage.setItem(role_key, response.data.role);
+                localStorage.setItem(expire_key, new Date(response.data.expireTime).getTime());
             }
-            // 保存数据到 localStorage
-            localStorage.setItem(token_key, response.data.token);
-            localStorage.setItem(username_key, response.data.username);
-            localStorage.setItem(role_key, response.data.role);
-            localStorage.setItem(expire_key, new Date(response.data.expireTime).getTime());
         },
         error: function(xhr, status, error) {
             alert('登录失败：' + (xhr.responseJSON ? xhr.responseJSON.message : '未知错误'));

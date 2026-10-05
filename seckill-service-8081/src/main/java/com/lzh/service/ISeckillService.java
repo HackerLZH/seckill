@@ -44,4 +44,10 @@ public interface ISeckillService {
      * @param orderId
      */
     void postProcess(Long orderId);
+
+    /**
+     * 扫码成功保存二维码地址
+     * @param qrCode
+     */
+    void insertQrCode(Long orderId, String qrCode);
 }
