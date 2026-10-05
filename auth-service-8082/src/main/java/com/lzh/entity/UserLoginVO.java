@@ -4,6 +4,8 @@ import com.lzh.enums.Role;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Data
 public class UserLoginVO {
@@ -11,4 +13,6 @@ public class UserLoginVO {
     private String username;
     private String token;
     private Role role;
+    private LocalDateTime loginTime;
+    private LocalDateTime expireTime;
 }

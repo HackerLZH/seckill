@@ -54,9 +54,9 @@ public class PaymentController {
     }
 
     @Operation(summary = "查询支付状态", description = "根据订单ID查询支付状态")
-    @GetMapping("/status/{orderId}")
+    @GetMapping("/status/{payType}/{orderId}")
     public PaymentResponse queryStatus(
-            @RequestParam("支付方式 WECHAT/ALIPAY") String payType,
+            @PathVariable("payType") String payType,
             @PathVariable("orderId") Long orderId) {
 
         return paymentService.queryStatus(payType, orderId);

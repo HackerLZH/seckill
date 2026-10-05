@@ -1,14 +1,13 @@
 package com.lzh.entity;
 
-import java.time.LocalDateTime;
-
 import com.lzh.enums.ActiveStatus;
 import com.lzh.enums.Role;
 import com.lzh.enums.Sex;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /**
  * 用户完整信息
@@ -26,6 +25,7 @@ public class UserInfo {
     private String phone;
     private String address;
     private LocalDateTime createTime;
+    private LocalDateTime loginTime;
     private ActiveStatus isActive;
     private Role role;
 }
