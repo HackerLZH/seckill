@@ -33,9 +33,10 @@ public interface ISeckillService {
 
     /**
      * 获取秒杀订单
+     * @param userId
      * @return
      */
-    List<GoodsKillOrderVO> getKillOrders();
+    List<GoodsKillOrderVO> getKillOrders(Integer userId);
 
     boolean checkOrder(Long orderId, Integer userId, OrderStatus orderStatus);
 
@@ -50,4 +51,10 @@ public interface ISeckillService {
      * @param qrCode
      */
     void insertQrCode(Long orderId, String qrCode);
+
+    /**
+     * 删除秒杀订单
+     * @param orderId
+     */
+    void deleteKillOrder(Long orderId);
 }
