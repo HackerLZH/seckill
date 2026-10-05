@@ -5,6 +5,7 @@ import com.alibaba.cloud.nacos.annotation.NacosConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.feiniaojin.gracefulresponse.GracefulResponse;
+import com.lzh.config.CacheConfig;
 import com.lzh.entity.GoodsKillOrder;
 import com.lzh.entity.GoodsKillOrderVO;
 import com.lzh.entity.GoodsKillVO;
@@ -21,6 +22,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -121,7 +123,6 @@ public class SeckillServiceImpl implements ISeckillService {
         }
     }
 
-    // @Transactional
     @Override
     public void saveOrder(GoodsKillOrder order) {
         try {
@@ -161,6 +162,7 @@ public class SeckillServiceImpl implements ISeckillService {
         }
     }
 
+    @Cacheable(value = CacheConfig.CACHE_PRODUCTS, key = "'kill_all'")
     @Override
     public GoodsKillVO getProducts() {
         try {
@@ -193,10 +195,13 @@ public class SeckillServiceImpl implements ISeckillService {
         }
     }
 
+//    @Cacheable(value = CacheConfig.CACHE_PRODUCTS, key = "'killorder_' + #userId")
     @Override
-    public List<GoodsKillOrderVO> getKillOrders() {
+    public List<GoodsKillOrderVO> getKillOrders(Integer userId) {
         try {
-            return goodsKillOrderMapper.findOrdersByUserId(UserHolder.getUser().getId());
+            List<GoodsKillOrderVO> orders = goodsKillOrderMapper.findOrdersByUserId(userId);
+            log.info("长度：{}", orders.size());
+            return orders;
         } catch (Exception e) {
             e.printStackTrace();
             return List.of();
@@ -263,6 +268,11 @@ public class SeckillServiceImpl implements ISeckillService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void deleteKillOrder(Long orderId) {
+        goodsKillOrderMapper.deleteByOrderId(orderId);
     }
 
 }

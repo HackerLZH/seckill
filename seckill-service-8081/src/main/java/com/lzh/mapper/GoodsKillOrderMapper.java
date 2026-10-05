@@ -38,4 +38,7 @@ public interface GoodsKillOrderMapper {
             @Result(column = "kill_id", property = "goodsKillId")
     })
     GoodsKillOrder findKillOrderByOrderId(@Param("orderId") Long orderId);
+
+    @Delete("delete from goods_kill_order where order_id = #{orderId}")
+    void deleteByOrderId(@Param("orderId") Long orderId);
 }

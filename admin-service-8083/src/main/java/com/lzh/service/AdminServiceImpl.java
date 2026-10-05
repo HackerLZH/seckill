@@ -5,6 +5,7 @@ import com.lzh.entity.GoodsDTO;
 import com.lzh.entity.GoodsKillDTO;
 import com.lzh.entity.UserDTO1;
 import com.lzh.feign.AuthFeign;
+import com.lzh.feign.SeckillFeign;
 import com.lzh.mapper.AdminMapper;
 import com.lzh.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,8 @@ public class AdminServiceImpl implements IAdminService {
     private AdminMapper adminMapper;
     @Autowired
     private AuthFeign authFeign;
+    @Autowired
+    private SeckillFeign seckillFeign;
     @Autowired
     private RedisUtil redisUtil;
     
@@ -121,6 +124,7 @@ public class AdminServiceImpl implements IAdminService {
                         , TimeUnit.SECONDS
                 );
             }
+            seckillFeign.evictKillCache();
             log.info("添加秒杀商品成功：{}", goodsKillDTO);
         } catch (Exception e) {
             e.printStackTrace();

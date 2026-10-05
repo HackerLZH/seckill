@@ -1,24 +1,33 @@
 package com.lzh.controller;
 
+import com.lzh.config.CacheConfig;
 import com.lzh.entity.GoodsKillOrderVO;
 import com.lzh.entity.GoodsKillVO;
 import com.lzh.enums.OrderStatus;
 import com.lzh.service.ISeckillService;
+import com.lzh.utils.UserHolder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 
+@Slf4j
 @Tag(name = "秒杀接口")
 @RestController
 public class SeckillController {
     @Autowired
     private ISeckillService seckillService;
+
+    @Autowired
+    private CacheManager cacheManager;
 
     @GetMapping("/test")
     public void test() {
@@ -41,7 +50,13 @@ public class SeckillController {
     @Operation(summary = "我的订单")
     @GetMapping("/kill/orders")
     public List<GoodsKillOrderVO> getKillOrders() {
-        return seckillService.getKillOrders();
+        return seckillService.getKillOrders(UserHolder.getUser().getId());
+    }
+
+    @Operation(summary = "删除秒杀订单")
+    @PostMapping("/delete/kill/{orderId}")
+    public void deleteKillOrder(@PathVariable("orderId") Long orderId) {
+        seckillService.deleteKillOrder(orderId);
     }
 
     @Operation(summary = "获取秒杀商品")
@@ -62,9 +77,16 @@ public class SeckillController {
         seckillService.postProcess(orderId);
     }
 
+    @CacheEvict(value = CacheConfig.CACHE_PRODUCTS, key = "'kill_all'")
+    @Operation(summary = "强制清除秒杀商品缓存（内部路径）")
+    @PostMapping("/internal/evict/kill/cache")
+    public void evictKillCache() {
+        log.info("管理员更新秒杀商品=>清空缓存");
+    }
+
     @Operation(summary = "扫码成功，保存二维码地址（内部路径）")
     @PostMapping("/internal/insert/qrcode")
-    void insertQrCode(@RequestParam("orderId") Long orderId, @RequestParam("qrcode") String qrCode) {
+    public void insertQrCode(@RequestParam("orderId") Long orderId, @RequestParam("qrcode") String qrCode) {
         seckillService.insertQrCode(orderId, qrCode);
     }
 }

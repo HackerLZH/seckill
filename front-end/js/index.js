@@ -574,7 +574,12 @@ function renderOrderList(orders) {
                                 <small class="text-muted">创建时间：${formattedTime}</small>
                                 ${order.payTime ? `<br><small class="text-muted">支付时间：${payTime}</small>` : ''}
                             </div>
-                            <div>${actionButton}</div>
+                            <div class="d-flex gap-2">
+                                ${actionButton}
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteOrder('${orderId}')">
+                                    <i class="fas fa-trash"></i> 删除订单
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -603,6 +608,35 @@ function resumePayment(orderId, name, price, qrcodeUrl) {
 
     showQRCode(qrcodeUrl, orderId, payType);
     $('#cartModal').modal('hide');
+}
+
+// 删除订单
+function deleteOrder(orderId) {
+    if (!confirm('确定要删除该订单吗？删除后无法恢复。')) {
+        return;
+    }
+
+    const token = localStorage.getItem(token_key);
+    if (!token) {
+        $('#loginModal').modal('show');
+        return;
+    }
+
+    $.ajax({
+        url: `${RQ_PREF}/seckill/delete/kill/${orderId}`,
+        method: 'POST',
+        headers: {
+            [token_key]: token
+        },
+        success: function(response) {
+            showToast('删除成功', '订单已删除', 'success');
+            loadOrders(); // 重新加载订单列表
+        },
+        error: function(xhr, status, error) {
+            const message = xhr.responseJSON ? xhr.responseJSON.message : '删除失败，请稍后重试';
+            showToast('删除失败', message, 'danger');
+        }
+    });
 }
 
 $('#loginForm').submit(function(e) {
