@@ -1,3 +1,5 @@
+[示例网址](https://seckill.lzhcf.dpdns.org)
+
 环境：
 
 ![image](https://github.com/user-attachments/assets/7fb83d6a-a698-4d3c-8737-5af8957a1843)
