@@ -20,6 +20,81 @@ function checkLogin() {
     return token;
 }
 
+// ===== 全局加载提示 =====
+// 创建加载遮罩层
+function createLoadingOverlay() {
+    if ($('#loadingOverlay').length === 0) {
+        const overlayHtml = `
+            <div id="loadingOverlay" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: none;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                flex-direction: column;
+            ">
+                <div class="spinner-border text-light" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="text-light mt-3 fs-5" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                    网路有延迟，请耐心等待
+                </div>
+            </div>
+        `;
+        $('body').append(overlayHtml);
+    }
+}
+
+// 显示加载提示
+function showLoading() {
+    createLoadingOverlay();
+    $('#loadingOverlay').fadeIn(200);
+}
+
+// 隐藏加载提示
+function hideLoading() {
+    $('#loadingOverlay').fadeOut(200);
+}
+
+// 全局 AJAX 事件处理
+let ajaxRequestCount = 0;
+
+$(document).ajaxSend(function(event, jqXHR, settings) {
+    // 跳过全局加载提示的请求（如轮询请求）
+    if (settings.skipGlobalLoading === true) {
+        return;
+    }
+    ajaxRequestCount++;
+    showLoading();
+});
+
+$(document).ajaxComplete(function(event, jqXHR, settings) {
+    // 跳过全局加载提示的请求
+    if (settings.skipGlobalLoading === true) {
+        return;
+    }
+    ajaxRequestCount = Math.max(0, ajaxRequestCount - 1);
+    if (ajaxRequestCount === 0) {
+        hideLoading();
+    }
+});
+
+$(document).ajaxError(function(event, jqXHR, settings, thrownError) {
+    // 跳过全局加载提示的请求
+    if (settings.skipGlobalLoading === true) {
+        return;
+    }
+    ajaxRequestCount = Math.max(0, ajaxRequestCount - 1);
+    if (ajaxRequestCount === 0) {
+        hideLoading();
+    }
+});
+
 // 显示 Toast 通知
 function showToast(title, message, type = 'info') {
     const toastId = 'toast-' + Date.now();
@@ -391,6 +466,7 @@ function startPaymentPolling(orderId, payType) {
         $.ajax({
             url: `${RQ_PREF}/payment/status/${payType}/${orderId}`,
             method: 'GET',
+            skipGlobalLoading: true, // 跳过全局加载提示
             headers: {
                 [token_key]: localStorage.getItem(token_key)
             },
