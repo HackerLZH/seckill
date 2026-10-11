@@ -13,7 +13,7 @@ services:
       - NACOS_USERNAME=${NACOS_USERNAME:-nacos}
       - NACOS_PASSWORD=${NACOS_PASSWORD:-nacos}
     ports:
-      - "${GATEWAY_PORT:-8080}:8080"
+      - "${GATEWAY_PORT:-8080}:${GATEWAY_PORT:-8080}"
     networks:
       - seckill
     depends_on:
@@ -33,7 +33,7 @@ services:
       - NACOS_USERNAME=${NACOS_USERNAME:-nacos}
       - NACOS_PASSWORD=${NACOS_PASSWORD:-nacos}
     ports:
-      - "${AUTH_SERVICE_PORT:-8082}:8082"
+      - "${AUTH_SERVICE_PORT:-8082}:${AUTH_SERVICE_PORT:-8082}"
     networks:
       - seckill
   seckill:
@@ -50,7 +50,7 @@ services:
       - NACOS_USERNAME=${NACOS_USERNAME:-nacos}
       - NACOS_PASSWORD=${NACOS_PASSWORD:-nacos}
     ports:
-      - "${SECKILL_SERVICE_PORT:-8081}:8081"
+      - "${SECKILL_SERVICE_PORT:-8081}:${SECKILL_SERVICE_PORT:-8081}"
     networks:
       - seckill
   admin:
@@ -67,7 +67,7 @@ services:
       - NACOS_USERNAME=${NACOS_USERNAME:-nacos}
       - NACOS_PASSWORD=${NACOS_PASSWORD:-nacos}
     ports:
-      - "${ADMIN_SERVICE_PORT:-8083}:8083"
+      - "${ADMIN_SERVICE_PORT:-8083}:${ADMIN_SERVICE_PORT:-8083}"
     networks:
       - seckill
   payment:
@@ -80,11 +80,11 @@ services:
     mem_limit: ${SERVICE_MEM_LIMIT:-512m}
     environment:
       - TZ=Asia/Shanghai
-      - PORT=${SECKILL_SERVICE_PORT:-8084}
+      - PORT=${PAYMENT_SERVICE_PORT:-8084}
       - NACOS_USERNAME=${NACOS_USERNAME:-nacos}
       - NACOS_PASSWORD=${NACOS_PASSWORD:-nacos}
     ports:
-      - "${SECKILL_SERVICE_PORT:-8084}:8084"
+      - "${PAYMENT_SERVICE_PORT:-8084}:${PAYMENT_SERVICE_PORT:-8084}"
     networks:
       - seckill
   redis:
