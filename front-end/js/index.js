@@ -63,6 +63,9 @@ function hideLoading() {
 
 // 全局 AJAX 事件处理
 let ajaxRequestCount = 0;
+let requestStartTime = 0;
+let loadingFallbackTimer = null;
+const LOADING_DELAY = 1000; // 1秒后如果没有新请求，显示加载提示
 
 $(document).ajaxSend(function(event, jqXHR, settings) {
     // 跳过全局加载提示的请求（如轮询请求）
@@ -70,16 +73,53 @@ $(document).ajaxSend(function(event, jqXHR, settings) {
         return;
     }
     ajaxRequestCount++;
-    showLoading();
+
+    // 第一次有请求时，记录开始时间
+    if (ajaxRequestCount === 1) {
+        requestStartTime = Date.now();
+
+        // 清除之前的计时器
+        if (loadingFallbackTimer) {
+            clearTimeout(loadingFallbackTimer);
+            loadingFallbackTimer = null;
+        }
+
+        // 设置备用计时器：如果1秒后还有未完成的请求，显示加载提示
+        loadingFallbackTimer = setTimeout(() => {
+            // 检查是否还有请求在进行
+            if (ajaxRequestCount > 0) {
+                showLoading();
+                loadingFallbackTimer = null; // 一旦显示，就不再清除
+            }
+        }, LOADING_DELAY);
+    }
 });
 
 $(document).ajaxComplete(function(event, jqXHR, settings) {
     // 跳过全局加载提示的请求
     if (settings.skipGlobalLoading === true) {
+        if (ajaxRequestCount > 0) {
+            ajaxRequestCount--;
+        }
+        // 如果最后一个请求完成，清除计时器并隐藏加载提示
+        if (ajaxRequestCount === 0) {
+            if (loadingFallbackTimer) {
+                clearTimeout(loadingFallbackTimer);
+                loadingFallbackTimer = null;
+            }
+            hideLoading();
+        }
         return;
     }
+
     ajaxRequestCount = Math.max(0, ajaxRequestCount - 1);
+
+    // 如果最后一个请求完成，清除计时器并隐藏加载提示
     if (ajaxRequestCount === 0) {
+        if (loadingFallbackTimer) {
+            clearTimeout(loadingFallbackTimer);
+            loadingFallbackTimer = null;
+        }
         hideLoading();
     }
 });
@@ -87,10 +127,28 @@ $(document).ajaxComplete(function(event, jqXHR, settings) {
 $(document).ajaxError(function(event, jqXHR, settings, thrownError) {
     // 跳过全局加载提示的请求
     if (settings.skipGlobalLoading === true) {
+        if (ajaxRequestCount > 0) {
+            ajaxRequestCount--;
+        }
+        // 如果最后一个请求完成，清除计时器并隐藏加载提示
+        if (ajaxRequestCount === 0) {
+            if (loadingFallbackTimer) {
+                clearTimeout(loadingFallbackTimer);
+                loadingFallbackTimer = null;
+            }
+            hideLoading();
+        }
         return;
     }
+
     ajaxRequestCount = Math.max(0, ajaxRequestCount - 1);
+
+    // 如果最后一个请求完成，清除计时器并隐藏加载提示
     if (ajaxRequestCount === 0) {
+        if (loadingFallbackTimer) {
+            clearTimeout(loadingFallbackTimer);
+            loadingFallbackTimer = null;
+        }
         hideLoading();
     }
 });
