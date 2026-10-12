@@ -4,6 +4,7 @@ import com.lzh.enums.ActiveStatus;
 import com.lzh.enums.Role;
 import com.lzh.enums.Sex;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 /**
  * 用户完整信息
  */
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +25,7 @@ public class UserInfo {
     private Sex sex;
     private String email;
     private String phone;
-    private String address;
+    private Integer defaultAddressId;
     private LocalDateTime createTime;
     private LocalDateTime loginTime;
     private ActiveStatus isActive;

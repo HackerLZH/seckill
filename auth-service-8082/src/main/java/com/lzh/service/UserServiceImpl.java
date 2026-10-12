@@ -3,9 +3,8 @@ package com.lzh.service;
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.cloud.nacos.annotation.NacosConfig;
 import com.feiniaojin.gracefulresponse.GracefulResponse;
-import com.lzh.entity.UserDTO;
-import com.lzh.entity.UserInfo;
-import com.lzh.entity.UserLoginVO;
+import com.lzh.config.CacheConfig;
+import com.lzh.entity.*;
 import com.lzh.enums.Role;
 import com.lzh.mapper.UserMapper;
 import com.lzh.utils.Constants;
@@ -14,9 +13,14 @@ import com.lzh.utils.RedisUtil;
 import com.lzh.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +31,8 @@ public class UserServiceImpl implements IUserService{
     private UserMapper userMapper;
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private CacheManager cacheManager;
 
     @NacosConfig(dataId = "common.yml", group = "EXT_GROUP", key = "token.timeout")
     private Integer tokenTimeout; // 分钟
@@ -128,4 +134,63 @@ public class UserServiceImpl implements IUserService{
         }
     }
 
+    @Cacheable(value = CacheConfig.CACHE_AUTH, key = "'UserInfo:' + #p0")
+    @Override
+    public UserInfo getUserInfo(String username) {
+        return userMapper.getUserByName(username);
+    }
+
+    @CacheEvict(value = CacheConfig.CACHE_AUTH, key = "'UserInfo:' + #p0.username")
+    @Override
+    public boolean updateUserInfo(UserInfo userInfo) {
+        try {
+            int result = userMapper.updateUserInfo(userInfo);
+            if (result > 0) {
+                log.info("用户信息更新成功: {}", userInfo.getUsername());
+                return true;
+            }
+        } catch (Exception e) {
+            log.error("更新用户信息异常", e);
+        }
+        return false;
+    }
+
+    @Cacheable(value = CacheConfig.CACHE_AUTH, key = "'address:' + #p0")
+    @Override
+    public List<Address> getUserAddress(Integer default_address_id) {
+        try {
+            return userMapper.findAllAddressById(default_address_id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Transactional
+    @Override
+    public void addAddress(AddressAddDTO addressAddDTO) {
+        try {
+            UserInfo user = userMapper.getUserByName(addressAddDTO.getUsername());
+            Address address = Address.builder()
+                    .userId(user.getId())
+                    .text(addressAddDTO.getDetailAddress())
+                    .name(addressAddDTO.getReceiverName())
+                    .phone(addressAddDTO.getReceiverPhone())
+                    .build();
+            userMapper.insertAddress(address);
+            // 第一条为默认地址
+            if (userMapper.findAllAddressById(address.getId()).size() == 1) {
+                userMapper.updateUserInfo(UserInfo.builder()
+                        .username(addressAddDTO.getUsername())
+                        .defaultAddressId(address.getId())
+                        .build()
+                );
+            }
+            // 清除地址缓存
+            Objects.requireNonNull(cacheManager.getCache(CacheConfig.CACHE_AUTH))
+                    .evict("address:" + user.getDefaultAddressId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

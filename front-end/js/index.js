@@ -773,6 +773,404 @@ function deleteOrder(orderId) {
     });
 }
 
+var currentUserInfo = null;
+
+$('#userInfoBtn').click(function(e) {
+    e.preventDefault();
+    const token = checkLogin();
+    if (!token) {
+        $('#loginModal').modal('show');
+        return;
+    }
+    let username = localStorage.getItem(username_key);
+
+    // 显示加载状态
+    $('#userInfo-container').html(`
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 mb-0 text-muted">正在加载用户信息...</p>
+        </div>
+    `);
+
+    $.ajax({
+        url: `${RQ_PREF}/auth/info/${username}`,
+        method: 'GET',
+        headers: {
+            [token_key]: token
+        },
+        success: function(response) {
+            const userInfo = response.data || response;
+            currentUserInfo = userInfo; // 保存用于编辑
+
+            // 如果有默认地址ID，获取地址列表
+            if (userInfo.defaultAddressId) {
+                fetchUserAddressList();
+            } else {
+                showUserInfoModal();
+            }
+        },
+        error: function(xhr, status, error) {
+            let errorMessage = '获取用户信息失败';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMessage = xhr.responseJSON.message;
+            } else if (xhr.status === 401 || xhr.status === 403) {
+                errorMessage = '登录已过期，请重新登录';
+                clearState();
+                $('#loginModal').modal('show');
+            }
+            $('#userInfo-container').html(`
+                <div class="text-center py-4">
+                    <i class="fas fa-exclamation-circle text-warning fa-3x mb-3"></i>
+                    <h6>${errorMessage}</h6>
+                    <button class="btn btn-primary mt-2" onclick="refreshUserInfo()">重新加载</button>
+                </div>
+            `);
+            showToast('获取失败', errorMessage, 'danger');
+        }
+    });
+});
+
+// 进入编辑模式
+function enterEditUserInfoMode() {
+    if (!currentUserInfo) return;
+    const userInfo = currentUserInfo;
+    const editHtml = `
+        <form id="editUserInfoForm">
+            <div class="row mb-2">
+                <div class="col-6">
+                    <label class="form-label">年龄</label>
+                    <input type="number" class="form-control" name="age" value="${userInfo.age || ''}" min="0">
+                </div>
+                <div class="col-6">
+                    <label class="form-label">性别</label>
+                    <select class="form-select" name="sex">
+                        <option value="MALE" ${userInfo.sex === 'MALE' ? 'selected' : ''}>男</option>
+                        <option value="FEMALE" ${userInfo.sex === 'FEMALE' ? 'selected' : ''}>女</option>
+                        <option value="UNKNOWN" ${!userInfo.sex || userInfo.sex === 'UNKNOWN' ? 'selected' : ''}>未知</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-2">
+                <label class="form-label">邮箱</label>
+                <input type="email" class="form-control" name="email" value="${userInfo.email || ''}">
+            </div>
+            <div class="mb-2">
+                <label class="form-label">手机</label>
+                <input type="text" class="form-control" name="phone" value="${userInfo.phone || ''}">
+            </div>
+        </form>
+    `;
+    $('#userInfo-container').html(editHtml);
+    $('#userInfoFooter').html(`
+        <button type="button" class="btn btn-success" onclick="saveUserInfoEdit()"><i class="fas fa-save"></i> 保存</button>
+        <button type="button" class="btn btn-secondary" onclick="cancelEditUserInfo()"><i class="fas fa-times"></i> 取消</button>
+    `);
+}
+
+// 取消编辑，恢复只读视图
+function cancelEditUserInfo() {
+    if (currentUserInfo) {
+        showUserInfoModal(currentUserInfo);
+    }
+}
+
+// 保存编辑后的用户信息
+function saveUserInfoEdit() {
+    const token = checkLogin();
+    if (!token) {
+        $('#loginModal').modal('show');
+        return;
+    }
+    const username = localStorage.getItem(username_key);
+    const formData = $('#editUserInfoForm').serializeArray();
+    const updated = {};
+    formData.forEach(item => { updated[item.name] = item.value; });
+    const payload = {
+        username: username,
+        age: updated.age ? parseInt(updated.age, 10) : null,
+        sex: updated.sex,
+        email: updated.email,
+        phone: updated.phone
+    };
+    $.ajax({
+        url: `${RQ_PREF}/auth/info/update`,
+        method: 'PUT',
+        contentType: 'application/json',
+        headers: { [token_key]: token },
+        data: JSON.stringify(payload),
+        success: function(response) {
+            if (response.data) {
+                showToast('成功', '用户信息已更新', 'success');
+                // 重新获取最新信息
+                $('#userInfoBtn').click();
+            } else {
+                const msg = response.message || '更新失败';
+                showToast('错误', msg, 'danger');
+            }
+        },
+        error: function(xhr) {
+            const msg = xhr.responseJSON ? xhr.responseJSON.message : '更新请求出错';
+            showToast('错误', msg, 'danger');
+        }
+    });
+}
+
+function showUserInfoModal() {
+    // 在没有用户信息时直接返回，避免非法的 return 语句
+    let userInfo = currentUserInfo;
+    if (!userInfo || !userInfo.username) {
+        $('#userInfo-container').html(`
+            <div class="text-center py-4">
+                <i class="fas fa-exclamation-circle text-warning fa-3x mb-3"></i>
+                <h6>用户信息格式错误</h6>
+                <button class="btn btn-primary mt-2" onclick="refreshUserInfo()">重新加载</button>
+            </div>
+        `);
+        // 直接退出函数，不再继续执行后面的代码
+        return;
+    }
+
+    // 格式化时间
+    function formatDateTime(dateTimeStr) {
+        if (!dateTimeStr) return '--';
+        try {
+            const date = new Date(dateTimeStr);
+            if (isNaN(date.getTime())) return '--';
+            return date.toLocaleString('zh-CN');
+        } catch (e) {
+            return '--';
+        }
+    }
+
+    // 格式化角色
+    function formatRole(role) {
+        const roleMap = {
+            'A': '管理员',
+            'U': '用户'
+        };
+        return roleMap[role] || role || '--';
+    }
+
+    // 格式化性别
+    function formatSex(sex) {
+        const sexMap = {
+            'MALE': '男',
+            'FEMALE': '女',
+            'UNKNOWN': '未知'
+        };
+        return sexMap[sex] || sex || '--';
+    }
+
+    // 格式化账号状态
+    function formatActiveStatus(isActive) {
+        const statusMap = {
+            'ACTIVE': '<span class="badge bg-success">已激活</span>',
+            'INACTIVE': '<span class="badge bg-secondary">未激活</span>'
+        };
+        return statusMap[isActive] || isActive || '--';
+    }
+
+    const userInfoHtml = `
+        <div class="user-info-card">
+            <div class="text-center mb-4">
+                <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                    <i class="fas fa-user text-white"></i>
+                </div>
+                <h5 class="mt-3 mb-1">${userInfo.username}</h5>
+                <p class="text-muted mb-0">用户ID: ${userInfo.id || '--'}</p>
+            </div>
+
+            <hr>
+
+            <div class="row">
+                <div class="col-6">
+                    <p class="mb-2"><strong>角色:</strong></p>
+                    <p>${formatRole(userInfo.role)}</p>
+                </div>
+                <div class="col-6">
+                    <p class="mb-2"><strong>年龄:</strong></p>
+                    <p>${userInfo.age}</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-6">
+                    <p class="mb-2"><strong>性别:</strong></p>
+                    <p>${formatSex(userInfo.sex)}</p>
+                </div>
+                <div class="col-6">
+                    <p class="mb-2"><strong>账号状态:</strong></p>
+                    <p>${formatActiveStatus(userInfo.isActive)}</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <p class="mb-2"><strong>邮箱:</strong></p>
+                    <p>${userInfo.email || '--'}</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <p class="mb-2"><strong>手机:</strong></p>
+                    <p>${userInfo.phone || '--'}</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="address-section">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <p class="mb-0"><strong>地址:</strong></p>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addressCollapse">
+                                    <i class="fas fa-chevron-down"></i> 展开
+                                </button>
+                                <button class="btn btn-sm btn-success" onclick="showAddAddressModal()">
+                                    <i class="fas fa-plus"></i> 添加地址
+                                </button>
+                            </div>
+                        </div>
+                        <div class="collapse" id="addressCollapse">
+                            <div class="card card-body">
+                                ${userInfo.addresses && userInfo.addresses.length > 0 ? `
+                                    <div class="address-list">
+                                        ${userInfo.addresses.map(addr => `
+                                            <div class="address-item ${addr.id === userInfo.defaultAddressId ? 'default' : ''}">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <div>
+                                                        <h6 class="mb-1">${addr.text || addr.addressName || '地址'}</h6>
+                                                        <p class="mb-1">${addr.name || ''}</p>
+                                                        <p class="mb-1">${addr.phone || ''}</p>
+                                                    </div>
+                                                    ${addr.id === userInfo.defaultAddressId ? '<span class="badge bg-primary">默认</span>' : ''}
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : '<p class="text-muted">暂无地址</p>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row">
+                <div class="col-6">
+                    <p class="mb-2"><strong>注册时间:</strong></p>
+                    <p class="small text-muted">${formatDateTime(userInfo.createTime)}</p>
+                </div>
+                <div class="col-6">
+                    <p class="mb-2"><strong>最后登录:</strong></p>
+                    <p class="small text-muted">${formatDateTime(userInfo.loginTime)}</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    $('#userInfo-container').html(userInfoHtml);
+    $('#userInfoModal').modal('show');
+    // 在底部放置编辑按钮（确保在只读视图中出现）
+    $('#userInfoFooter').html(`
+        <button type="button" class="btn btn-primary" id="editUserInfoBtn" onclick="enterEditUserInfoMode()">
+            <i class="fas fa-edit"></i> 编辑
+        </button>
+    `);
+}
+
+// 获取用户地址列表
+function fetchUserAddressList() {
+    const token = checkLogin();
+    if (!token) {
+        $('#loginModal').modal('show');
+        return;
+    }
+
+    const defaultAddressId = currentUserInfo.defaultAddressId;
+    $.ajax({
+        url: `${RQ_PREF}/auth/info/address/${defaultAddressId}`,
+        method: 'GET',
+        headers: {
+            [token_key]: token
+        },
+        success: function(response) {
+            currentUserInfo.addresses = response.data || [];
+            // 重新显示用户信息模态框
+            showUserInfoModal();
+        },
+        error: function(xhr) {
+            showToast('错误', '获取地址列表失败', 'danger');
+            // 即使获取地址失败，也显示用户信息
+            showUserInfoModal();
+        }
+    });
+}
+
+// 显示添加地址模态框
+function showAddAddressModal() {
+    if (currentUserInfo.addresses && currentUserInfo.addresses.length === 5) {
+        showToast("警告", "地址数量以达到上限", "warning");
+        return;
+    }
+    $('#addAddressForm')[0].reset();
+    $('#addAddressModal').modal('show');
+}
+
+// 保存新地址
+function saveNewAddress() {
+    const token = checkLogin();
+    if (!token) {
+        $('#loginModal').modal('show');
+        return;
+    }
+
+    const username = localStorage.getItem(username_key);
+    const formData = $('#addAddressForm').serializeArray();
+    const addressData = {};
+    formData.forEach(item => {
+        addressData[item.name] = item.value;
+    });
+
+    // 构造请求体
+    const payload = {
+        username: username,
+        ...addressData
+    };
+
+    $.ajax({
+        url: `${RQ_PREF}/auth/info/address/add`,
+        method: 'POST',
+        contentType: 'application/json',
+        headers: { [token_key]: token },
+        data: JSON.stringify(payload),
+        success: function(response) {
+            if (response.data) {
+                showToast('成功', '地址添加成功', 'success');
+                $('#addAddressModal').modal('hide');
+                // 重新获取用户信息以更新地址列表
+                $('#userInfoBtn').click();
+            } else {
+                const msg = response.message || '添加失败';
+                showToast('错误', msg, 'danger');
+            }
+        },
+        error: function(xhr) {
+            const msg = xhr.responseJSON ? xhr.responseJSON.message : '添加请求出错';
+            showToast('错误', msg, 'danger');
+        }
+    });
+}
+
+// 刷新用户信息
+function refreshUserInfo() {
+    $('#userInfoBtn').click();
+}
+
 $('#loginForm').submit(function(e) {
     e.preventDefault();
 

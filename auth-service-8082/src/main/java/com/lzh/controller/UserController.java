@@ -1,8 +1,7 @@
 package com.lzh.controller;
 
 import com.feiniaojin.gracefulresponse.api.ValidationStatusCode;
-import com.lzh.entity.UserDTO;
-import com.lzh.entity.UserLoginVO;
+import com.lzh.entity.*;
 import com.lzh.service.IUserService;
 import com.lzh.utils.Constants;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -53,5 +53,29 @@ public class UserController {
         @Parameter(name = Constants.TOKEN_HEADER, description = "请求token",required = true,in = ParameterIn.HEADER)
         @RequestHeader(Constants.TOKEN_HEADER) String token) {
         userService.logout(token);
-    }  
+    }
+
+    @Operation(summary = "用户信息")
+    @GetMapping("/info/{username}")
+    public UserInfo info(@PathVariable("username") String username) {
+        return userService.getUserInfo(username);
+    }
+
+    @Operation(summary = "更新用户信息")
+    @PutMapping("/info/update")
+    public boolean updateUserInfo(@RequestBody UserInfo userInfo) {
+        return userService.updateUserInfo(userInfo);
+    }
+
+    @Operation(summary = "查询用户地址")
+    @GetMapping("/info/address/{default}")
+    public List<Address> address(@PathVariable("default") Integer default_address_id) {
+        return userService.getUserAddress(default_address_id);
+    }
+
+    @Operation(summary = "添加用户地址")
+    @PostMapping("/info/address/add")
+    public void addressAdd(@RequestBody AddressAddDTO addressAddDTO) {
+        userService.addAddress(addressAddDTO);
+    }
 }
