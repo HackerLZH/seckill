@@ -151,7 +151,115 @@ $(document).ajaxError(function(event, jqXHR, settings, thrownError) {
         }
         hideLoading();
     }
+
+    // 全局统一的网关错误处理
+    const response = jqXHR.responseJSON;
+
+    if (response && response.status) {
+        // 网关层统一响应格式：{ status: number, message: string }
+        const code = response.status;
+        const message = response.message || '';
+
+        // 网关特定错误码处理
+        switch(code) {
+            // 6 开头的为网关错误码
+            case 600001: // 限流
+                showToast('限流', '请求过于频繁，请稍后重试', 'warning');
+                break;
+            case 600002: // 服务不可用/熔断
+                showToast('服务熔断', '后端服务暂时不可用', 'warning');
+                break;
+            case 600003: // token 失效/认证失败
+                showToast('认证失败', '登录已过期，请重新登录', 'warning');
+                clearState();
+                $('#loginModal').modal('show');
+                break;
+            case 600004: // 请求参数错误
+                showToast('参数错误', message, 'danger');
+                break;
+            case 600005: // 业务逻辑错误
+                showToast('业务错误', message, 'danger');
+                break;
+            case 600006: // 重复提交/操作频率过快
+                showToast('操作频率', message, 'warning');
+                break;
+            case 600007: // 资源不存在
+                showToast('资源不存在', message, 'danger');
+                break;
+            case 600008: // 请求过载
+                showToast('请求过载', '系统繁忙，请稍后再试', 'warning');
+                break;
+            // 401/403 也通过 response.code 返回时走这里
+            case 401:
+            case 403:
+                showToast('权限不足', '登录已过期，请重新登录', 'warning');
+                clearState();
+                $('#loginModal').modal('show');
+                break;
+            default:
+                // 其他 code 直接显示 message
+                showToast('网关响应', message || '未知错误', 'danger');
+        }
+        return;
+    }
+
+    // 没有网关标准响应，使用通用错误处理
+    // 先检查是否是认证错误（401/403）
+    if (handleAuthError(jqXHR)) {
+        return;
+    }
+
+    // 其他错误，使用通用错误信息获取
+    const errorMessage = getErrorMessage(jqXHR, '请求出错');
+    showToast('错误', errorMessage, 'danger');
 });
+
+// ===== 通用错误处理工具 =====
+// 从 jqXHR 安全获取错误信息
+function getErrorMessage(jqXHR, fallback = '请求失败，请稍后重试') {
+    // 1. 尝试解析 responseJSON（可能为 undefined）
+    if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+        return jqXHR.responseJSON.message;
+    }
+
+    // 2. 尝试解析 responseText（处理空响应或非JSON响应）
+    if (jqXHR.responseText) {
+        try {
+            const parsed = JSON.parse(jqXHR.responseText);
+            if (parsed && parsed.message) {
+                return parsed.message;
+            }
+            // 如果解析成功但没有 message 字段，返回整个响应（截断）
+            return typeof parsed === 'string' ? parsed : JSON.stringify(parsed);
+        } catch (e) {
+            // 不是有效的 JSON，直接返回文本（截断）
+            return jqXHR.responseText.substring(0, 200);
+        }
+    }
+
+    // 3. 根据状态码返回默认错误信息
+    switch (jqXHR.status) {
+        case 400: return '请求参数错误';
+        case 401: return '未授权，请重新登录';
+        case 403: return '权限不足';
+        case 404: return '请求资源不存在';
+        case 500: return '服务器内部错误';
+        case 502: return '网关错误';
+        case 503: return '服务不可用';
+        case 504: return '网关超时';
+        default: return fallback;
+    }
+}
+
+// 检查是否需要重新登录（401/403）
+function handleAuthError(jqXHR) {
+    if (jqXHR.status === 401 || jqXHR.status === 403) {
+        clearState();
+        $('#loginModal').modal('show');
+        return true;
+    }
+    return false;
+}
 
 // 显示 Toast 通知
 function showToast(title, message, type = 'info') {
@@ -334,7 +442,8 @@ function doKill(killId, name, imageUrl, price) {
             showToast(title, icon + message, 'danger');
         },
         error: function(xhr, status, error) {
-            alert("未知错误");
+            const message = getErrorMessage(xhr, '未知错误');
+            alert(message);
         }
     });
 }
@@ -441,7 +550,7 @@ function initiatePayment(orderId, name, price, payType) {
             }
         },
         error: function(xhr, status, error) {
-            const message = xhr.responseJSON ? xhr.responseJSON.message : '支付创建失败，请稍后重试';
+            const message = getErrorMessage(xhr, '支付创建失败，请稍后重试');
             alert(message);
         }
     });
@@ -767,7 +876,7 @@ function deleteOrder(orderId) {
             loadOrders(); // 重新加载订单列表
         },
         error: function(xhr, status, error) {
-            const message = xhr.responseJSON ? xhr.responseJSON.message : '删除失败，请稍后重试';
+            const message = getErrorMessage(xhr, '删除失败，请稍后重试');
             showToast('删除失败', message, 'danger');
         }
     });
@@ -812,13 +921,10 @@ $('#userInfoBtn').click(function(e) {
             }
         },
         error: function(xhr, status, error) {
-            let errorMessage = '获取用户信息失败';
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-                errorMessage = xhr.responseJSON.message;
-            } else if (xhr.status === 401 || xhr.status === 403) {
+            const isAuthError = handleAuthError(xhr);
+            let errorMessage = getErrorMessage(xhr, '获取用户信息失败');
+            if (isAuthError) {
                 errorMessage = '登录已过期，请重新登录';
-                clearState();
-                $('#loginModal').modal('show');
             }
             $('#userInfo-container').html(`
                 <div class="text-center py-4">
@@ -911,7 +1017,7 @@ function saveUserInfoEdit() {
             }
         },
         error: function(xhr) {
-            const msg = xhr.responseJSON ? xhr.responseJSON.message : '更新请求出错';
+            const msg = getErrorMessage(xhr, '更新请求出错');
             showToast('错误', msg, 'danger');
         }
     });
@@ -1104,7 +1210,8 @@ function fetchUserAddressList() {
             showUserInfoModal();
         },
         error: function(xhr) {
-            showToast('错误', '获取地址列表失败', 'danger');
+            const msg = getErrorMessage(xhr, '获取地址列表失败');
+            showToast('错误', msg, 'danger');
             // 即使获取地址失败，也显示用户信息
             showUserInfoModal();
         }
@@ -1160,7 +1267,7 @@ function saveNewAddress() {
             }
         },
         error: function(xhr) {
-            const msg = xhr.responseJSON ? xhr.responseJSON.message : '添加请求出错';
+            const msg = getErrorMessage(xhr, '添加请求出错');
             showToast('错误', msg, 'danger');
         }
     });
@@ -1206,7 +1313,8 @@ $('#loginForm').submit(function(e) {
             }
         },
         error: function(xhr, status, error) {
-            alert('登录失败：' + (xhr.responseJSON ? xhr.responseJSON.message : '未知错误'));
+            const message = getErrorMessage(xhr, '登录失败：未知错误');
+            alert('登录失败：' + message);
         }
     });
 
@@ -1247,7 +1355,8 @@ $('#registerForm').submit(function(e) {
             $('#registerForm')[0].reset();
         },
         error: function(xhr, status, error) {
-            alert('注册失败：' + (xhr.responseJSON ? xhr.responseJSON.message : '未知错误'));
+            const message = getErrorMessage(xhr, '注册失败：未知错误');
+            alert('注册失败：' + message);
         }
     });
 });
@@ -1265,7 +1374,8 @@ $('#logoutBtn').click(function(e) {
             clearState();
         },
         error: function(xhr, status, error) {
-            alert('登出失败:' + (xhr.responseJSON ? xhr.responseJSON.message : '未知错误'));
+            const message = getErrorMessage(xhr, '登出失败：未知错误');
+            alert('登出失败：' + message);
         }
     })
 });

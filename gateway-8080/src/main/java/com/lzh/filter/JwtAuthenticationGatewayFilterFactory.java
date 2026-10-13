@@ -48,7 +48,6 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
             }
             // token是否有效
             String token = exchange.getRequest().getHeaders().getFirst(Constants.TOKEN_HEADER);
-            log.info(token);
             if (Objects.isNull(token) || !redisUtil.exists(Constants.TOKEN_KEY + token)) {
                 log.warn("token无效");
                 exchange.getResponse().setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
@@ -63,7 +62,6 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
             }
             // 刷新token，重置有效期
             redisUtil.expire(Constants.TOKEN_KEY + token, tokenTimeout);
-            log.info("分发请求");
             // token传递到下游微服务
             return chain.filter(exchange);
         };
