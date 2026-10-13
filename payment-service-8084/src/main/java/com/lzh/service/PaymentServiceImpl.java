@@ -2,7 +2,9 @@ package com.lzh.service;
 
 import com.lzh.entity.PaymentRequest;
 import com.lzh.entity.PaymentResponse;
+import com.lzh.feign.SeckillFeign;
 import com.lzh.strategy.PaymentStrategyFactory;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ public class PaymentServiceImpl implements IPaymentService {
 
     @Autowired
     private PaymentStrategyFactory paymentStrategyFactory;
+    @Autowired
+    private SeckillFeign seckillFeign;
 
     @Override
     public PaymentResponse pay(PaymentRequest request) {
@@ -30,6 +34,20 @@ public class PaymentServiceImpl implements IPaymentService {
         }
         if (request.getPayType() == null || request.getPayType().trim().isEmpty()) {
             return PaymentResponse.fail("PARAM_ERROR", "支付方式不能为空");
+        }
+
+        boolean orderValid;
+        try {
+            orderValid = seckillFeign.checkOrder(request.getOrderId(), request.getUserId());
+        } catch (FeignException e) {
+            // Feign客户端异常（包括ServiceUnavailable、Timeout等）
+            log.warn("[Feign] SeckillFeign.checkOrder 调用失败: {}", e.getMessage());
+            return PaymentResponse.fail("ORDER_ERROR", "订单服务暂不可用，请稍后重试");
+        }
+
+        if (!orderValid) {
+            // 订单校验失败或服务降级（fallback 返回 false）
+            return PaymentResponse.fail("ORDER_ERROR", "订单服务暂不可用，请稍后重试");
         }
 
         // 2. 委托给策略工厂处理

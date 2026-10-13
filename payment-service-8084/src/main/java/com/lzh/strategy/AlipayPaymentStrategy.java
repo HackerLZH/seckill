@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lzh.entity.PaymentRequest;
 import com.lzh.entity.PaymentResponse;
 import com.lzh.feign.SeckillFeign;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -86,7 +87,12 @@ public class AlipayPaymentStrategy implements PaymentStrategy {
             if (response.isSuccess()) {
                 log.info("支付宝预下单成功，订单号: {}, 二维码链接: {}",
                     response.getOutTradeNo(), response.getQrCode());
-                seckillFeign.insertQrCode(Long.parseLong(response.getOutTradeNo()), response.getQrCode());
+                try {
+                    seckillFeign.insertQrCode(Long.parseLong(response.getOutTradeNo()), response.getQrCode());
+                } catch (FeignException e) {
+                    // 降级时仅记录日志，不影响主流程
+                    log.warn("[Fallback] SeckillFeign.insertQrCode 降级（二维码保存失败），继续后续流程");
+                }
                 // 保存二维码图片（测试）
 //                BitMatrix matrix = new MultiFormatWriter().encode(response.getQrCode(), BarcodeFormat.QR_CODE, 300, 300);
 //                File file = new File("/tmp/qr-code.png");

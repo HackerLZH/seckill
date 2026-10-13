@@ -546,7 +546,7 @@ function initiatePayment(orderId, name, price, payType) {
                     }
                 }
             } else {
-                alert('支付创建失败：' + response.message);
+                showToast("支付创建失败", response.message, "danger");
             }
         },
         error: function(xhr, status, error) {

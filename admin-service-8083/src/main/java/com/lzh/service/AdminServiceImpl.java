@@ -1,6 +1,7 @@
 package com.lzh.service;
 
 import com.alibaba.cloud.nacos.annotation.NacosConfig;
+import com.feiniaojin.gracefulresponse.GracefulResponse;
 import com.lzh.entity.GoodsDTO;
 import com.lzh.entity.GoodsKillDTO;
 import com.lzh.entity.UserDTO1;
@@ -8,6 +9,7 @@ import com.lzh.feign.AuthFeign;
 import com.lzh.feign.SeckillFeign;
 import com.lzh.mapper.AdminMapper;
 import com.lzh.utils.RedisUtil;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,6 +60,8 @@ public class AdminServiceImpl implements IAdminService {
             for (int i = beginId; i <= endId; ++i) {
                 authFeign.login("test" + i, "123456");
             }
+        } catch (FeignException e) {
+            GracefulResponse.raiseException("500", e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -126,6 +130,8 @@ public class AdminServiceImpl implements IAdminService {
             }
             seckillFeign.evictKillCache();
             log.info("添加秒杀商品成功：{}", goodsKillDTO);
+        } catch (FeignException e) {
+            GracefulResponse.raiseException("500", e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
         }
