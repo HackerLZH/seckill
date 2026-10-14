@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.46, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.22, for Linux (x86_64)
 --
 -- Host: localhost    Database: seckill
 -- ------------------------------------------------------
--- Server version	8.0.46
+-- Server version	8.0.22
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,6 +14,24 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `address`
+--
+
+DROP TABLE IF EXISTS `address`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `address` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `text` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_userId` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `goods`
@@ -32,7 +50,7 @@ CREATE TABLE `goods` (
   `is_active` enum('ACTIVE','INACTIVE') NOT NULL DEFAULT 'ACTIVE' COMMENT '状态',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COMMENT='商品表';
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='商品表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -51,7 +69,7 @@ CREATE TABLE `goods_kill` (
   `create_time` datetime NOT NULL COMMENT '秒杀创建时间',
   `is_active` enum('ACTIVE','INACTIVE') NOT NULL DEFAULT 'ACTIVE' COMMENT '状态',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COMMENT='商品秒杀表';
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COMMENT='商品秒杀表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -70,7 +88,7 @@ CREATE TABLE `goods_kill_order` (
   `create_time` datetime NOT NULL COMMENT '下单时间',
   `pay_time` datetime DEFAULT NULL COMMENT '支付时间',
   PRIMARY KEY (`order_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='秒杀订单表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='秒杀订单表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -89,7 +107,7 @@ CREATE TABLE `user` (
   `sex` enum('MALE','FEMALE','UNKNOWN') NOT NULL DEFAULT 'UNKNOWN' COMMENT '性别',
   `email` varchar(100) DEFAULT NULL COMMENT '邮箱',
   `phone` varchar(100) DEFAULT NULL COMMENT '电话',
-  `address` varchar(100) DEFAULT NULL COMMENT '地址',
+  `default_address_id` int DEFAULT NULL COMMENT 'default address',
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `login_time` datetime DEFAULT NULL,
   `is_active` enum('ACTIVE','INACTIVE') NOT NULL DEFAULT 'ACTIVE' COMMENT '状态',
@@ -97,7 +115,7 @@ CREATE TABLE `user` (
   UNIQUE KEY `idx_name` (`username`),
   UNIQUE KEY `idx_email` (`email`),
   UNIQUE KEY `idx_phone` (`phone`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3 COMMENT='用户信息表';
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COMMENT='用户信息表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -109,4 +127,4 @@ CREATE TABLE `user` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-10-06  0:19:57
+-- Dump completed on 2026-10-14 23:51:14
