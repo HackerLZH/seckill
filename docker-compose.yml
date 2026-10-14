@@ -179,6 +179,7 @@ services:
       - /www/seckill/docker/nginx/html:/usr/share/nginx/html
       - /www/seckill/docker/nginx/log:/var/log/nginx
       - /www/seckill/docker/nginx/conf.d:/etc/nginx/conf.d
+      - /vol2/server_pictures:/media/pictures
     privileged: true
     networks:
       - seckill

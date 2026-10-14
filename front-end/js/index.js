@@ -364,7 +364,7 @@ function createProductCardHTML(product, containerId) {
         const soldPercent = ((product.originStock - product.availableStock) * 100 / product.originStock).toFixed(1);
         return `
                     <div class="card product-card">
-                        <img src="${product.image}" class="card-img-top" alt="${product.name}">
+                        <img src="${product.image}" class="card-img-top" alt="${product.name}" oncontextMenu="return false;">
                         <div class="card-body">
                             <h5 class="card-title">${product.name}</h5>
                             <p class="card-text">
@@ -390,7 +390,7 @@ function createProductCardHTML(product, containerId) {
                         <div class="card-header bg-light">
                             ${new Date(product.startTime).toLocaleString()} 开始
                         </div>
-                        <img src="${product.image}" class="card-img-top" alt="${product.name}">
+                        <img src="${product.image}" class="card-img-top" alt="${product.name}" oncontextMenu="return false;">
                         <div class="card-body">
                             <h5 class="card-title">${product.name}</h5>
                             <p class="card-text">
